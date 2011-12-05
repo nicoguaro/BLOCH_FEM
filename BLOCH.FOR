@@ -20,7 +20,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     AUTHOR: NICOLAS GUARIN Z.                                        C
 C     GRUPO DE MECANICA APLICADA- UNIVERSIDAD EAFIT                    C
-C     LAST MOD: 21 SEPTEMBER 2011                                      C
+C     LAST MOD: 05 DECEMBER 2011                                       C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
@@ -28,12 +28,12 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
      1           IMNODES_WO,IRNODES_WO,IMNODES,IRNODES,NEVALS,AKXMIN,
      2           AKYMIN,AKXMAX,AKYMAX,NKX,NKY,EIGVALS)
 
-     IMPLICIT REAL*8(A-H,O-Z)
+      IMPLICIT REAL*8(A-H,O-Z)
 
-     PARAMETER (PI = 3.141592653589793)
+      PARAMETER (PI = 3.141592653589793)
 
 
-     DIMENSION SKG(NDOF,NDOF),SMG(NDOF,NDOF),COORDS(2,NCOR),
+      DIMENSION SKG(NDOF,NDOF),SMG(NDOF,NDOF),COORDS(2,NCOR),
      1          IMNODES_WO(NCOND_WO),IRNODES_WO(NCOND_WO),
      2          IMNODES(NCOND),IRNODES(NCOND)
 
@@ -59,8 +59,8 @@ C     LOCAL VARIABLES
       END DO
 
 
-      DKX = (AKXMAX - AXKMIN)/(NKX-1)  ! X Wave Number step
-      DKY = (AKYMAX - AXYMIN)/(NKY-1)  ! Y Wave Number step
+      DKX = (AKXMAX - AKXMIN)/(NKX-1)  ! X Wave Number step
+      DKY = (AKYMAX - AKYMIN)/(NKY-1)  ! Y Wave Number step
       AKX = AKXMIN
       ICONT = 1
       DO IKX=1,NKX
@@ -177,6 +177,15 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     SUBROUTINE  GEVALS(A,NRA,B,NRB,NEVALS, EVALS)                    C
 C                                                                      C
+C     Solves the Complex Generalized EigenValue Problem                C
+C       A*x = lambda*B*x                                               C
+C     making a Cholesky factorization for the B matrix, and then       C
+C     converting the original problem to a Standard Eigenvalue         C
+C     Problem.                                                         C
+C                                                                      C
+C     Both matrices A and B should be Hermitian and additionally       C
+C     Positive-Definiteness is needed for the B matrix.                C
+C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     AUTHOR: NICOLAS GUARIN Z.                                        C
@@ -223,6 +232,15 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     SUBROUTINE  GREVALS(A,NRA,B,NRB,NEVALS, EVALS)                   C
 C                                                                      C
+C     Solves the Complex Generalized EigenValue Problem                C
+C       A*x = lambda*B*x                                               C
+C     rewritting the problem as a Real Equivalent one                  C
+C     doubling the number of DOF.                                      C
+C                                                                      C
+C     Both matrices A and B should be Hermitian and additionally       C
+C     Positive-Definiteness is needed for the B matrix. The resulting  C
+C     Real System have Symmetric matrices                              C
+C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     AUTHOR: NICOLAS GUARIN Z.                                        C
@@ -238,7 +256,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
 
       COMPLEX*16 A, B
 
-      DIMENSION A(NRA,NRA), B(NRB,NRB), RA(2*NRA,2*NRA), RB(2*NRB,2*NRB),
+      DIMENSION A(NRA,NRA),B(NRB,NRB),RA(2*NRA,2*NRA),RB(2*NRB,2*NRB),
      1          EVALS(NEVALS),EVAUX(2*NEVALS), ALLEV(2*NRA)
 
 
