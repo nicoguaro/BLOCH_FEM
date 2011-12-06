@@ -58,7 +58,7 @@ C                                                                      C
 C         PROBLEM INTEGER ARRAYS                                       C
 C         ----------------------                                       C
 C                                                                      C
-C     ID(:,:)         :EQUATIONA ASSIGNED TO EACH NODE                 C
+C     ID(:,:)         :EQUATION ASSIGNED TO EACH NODE                 C
 C     IELT(:)         :ELEMENT TYPE ID'S                               C
 C     IELCON(:,:)     :ELEMENT CONNECTIVITIES                          C
 C     NNE(:)          :NUMBER OF NODES ASSIGNED TO EACH ELEMENT        C
