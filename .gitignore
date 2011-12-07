@@ -1,3 +1,21 @@
-/*.OPT
-/*.PLG
-/*.exe
+# Subfolders #
+##############
+/Debug
+
+# MS Compiling files #
+######################
+*.OPT
+*.PLG
+*.exe
+*.bsc
+
+# Visual Files #
+################
+
+
+# Own Files #
+#############
+*.dat
+*.freq
+*.msg
+*.sta
