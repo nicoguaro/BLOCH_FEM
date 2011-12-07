@@ -10,7 +10,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
 C                                                                      C
-C  UEL_FEM8.for                                                        C
+C  UEL_FEMB8.for                                                        C
 C  8-NODED ISOPARAMETRIC ELEMENT                                       C
 C  UNIVERSIDAD EAFIT                                                   C
 C  2011                                                                C
@@ -135,17 +135,19 @@ C
 C
       RETURN
 C      
-      END
+      END SUBROUTINE UEL_FEMB8
+
+C
 C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
 C                                                                      C
-C  UEL_FEM9.for 9-Noded Plasticity Isotropic Classical Return Mapp.    C
+C  UEL_FEM9.for 9-Noded Linear Elasticity Element.                     C
 C                                                                      C
 C  9-NODED ISOPARAMETRIC ELEMENT                                       C
 C  UNIVERSIDAD EAFIT                                                   C
-C  2010                                                                C
+C  2011                                                                C
 C  MECANICA APLICADA                                                   C
 C                                                                      C
 C                                                                      C
@@ -155,8 +157,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
 C                                                                      C
-C  USER ELEMENT SUBROUTINE-ISOTROPIC HARDENING MISES PLASTICITY        C
-C  AND ISOTROPIC ELASTICITY                                            C
+C  USER ELEMENT SUBROUTINE-ISOTROPIC ELASTICITY                        C
 C                                                                      C
 C  STANDARD  ISOPARAMETRIC ELEMENT                                     C
 C  FULL GAUSS INTEGRATION                                              C
@@ -305,17 +306,17 @@ C
 C
       RETURN
 C      
-      END
+      END SUBROUTINE UEL_FEM9
 C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
 C                                                                      C
-C  UEL_FEM6.for 6-Noded Plasticity Isotropic Classical Return Mapp.    C
+C  UEL_FEM6.for 6-Noded  Isotropic Elasticity.                         C
 C                                                                      C
 C  6-NODED ISOPARAMETRIC ELEMENT                                       C
 C  UNIVERSIDAD EAFIT                                                   C
-C  2005                                                                C
+C  2011                                                                C
 C  MECANICA APLICADA                                                   C
 C                                                                      C
 C                                                                      C
@@ -325,8 +326,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
 C                                                                      C
-C  USER ELEMENT SUBROUTINE-ISOTROPIC HARDENING MISES PLASTICITY        C
-C  AND ISOTROPIC ELASTICITY                                            C
+C  USER ELEMENT SUBROUTINE-ISOTROPIC ELASTICITY                        C
 C                                                                      C
 C  STANDARD  ISOPARAMETRIC ELEMENT                                     C
 C  FULL GAUSS INTEGRATION                                              C
@@ -475,4 +475,139 @@ C
 C
       RETURN
 C      
-      END
+      END SUBROUTINE UEL_FEM6
+
+C
+C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C                                                                      C
+C  UEL_FEM4.for 4-Noded  Isotropic Elasticity.                         C
+C                                                                      C
+C  4-NODED ISOPARAMETRIC ELEMENT                                       C
+C  UNIVERSIDAD EAFIT                                                   C
+C  2011                                                                C
+C  MECANICA APLICADA                                                   C
+C                                                                      C
+C                                                                      C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C                                                                      C
+C  USER ELEMENT SUBROUTINE-ISOTROPIC ELASTICITY                        C
+C                                                                      C
+C  STANDARD  ISOPARAMETRIC ELEMENT                                     C
+C  FULL GAUSS INTEGRATION                                              C
+C  CREATED BY JUAN GOMEZ                                               C
+C  STATE VARIABLES DEFINITIONS/GAUSS  POINT                            C
+C                                                                      C
+C                                                                      C
+C     1-4: STRESS VECTOR                       (4)                     C
+C     5-8: TOTAL STRAIN VECTOR                 (4)                     C
+C                                   TOTAL      72 SVARS                C
+C                                                                      C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE UEL_FEM4(AMATRX,AMASS,NDOFEL,PROPS,NPROPS,COORDS,MCRD,
+     1                     NNODE,JELEM)
+C     
+      IMPLICIT REAL*8(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.D0,HALF=0.5D0,ONE=1.D0,NTENS=4,TWO=2.D0,NGPTS=4,
+     1           THREE=3.D0)
+C
+C     Parameters required by UMAT.f
+C
+      PARAMETER (NDI=3)
+C
+C     Parameter arrays from UEL.f
+C
+      DIMENSION AMATRX(NDOFEL,NDOFEL),AMASS(NDOFEL,NDOFEL),
+     1          PROPS(NPROPS),COORDS(MCRD,NNODE)
+C
+C     User defined arrays
+C
+      DIMENSION B(NTENS,NDOFEL),BT(NDOFEL,NTENS),
+     1          FRST1(NDOFEL,NDOFEL),XX(MCRD,NNODE),
+     2          XW(NGPTS),XP(2,NGPTS),AUX1(NTENS,NDOFEL),
+     3          FRST3(NDOFEL,NDOFEL)
+C
+C     Arrays to be used in UMAT.f
+C
+      DIMENSION DDSDDE(NTENS,NTENS)
+C
+C     Initializes parameters required by UMAT.f
+C
+      CALL CLEAR(DDSDDE,NTENS,NTENS)
+C
+C     Clears RHS vector and Stiffness matrix
+C
+      CALL CLEAR(AMATRX,NDOFEL,NDOFEL)
+      CALL CLEAR(AMASS,NDOFEL,NDOFEL)
+C
+C**********************************************************************
+C     P U R E  D I S P L A C E M E N T  F O R M U L A T I O N
+C**********************************************************************
+C
+      RO=PROPS(3)
+C
+C     Generates Gauss points and weights.
+C
+      CALL GPOINTS3X3(XP,XW)
+      NGPT=4
+C
+C     Loops around all Gauss points
+C
+      DO NN=1,NGPT
+C
+        RII=XP(1,NN)
+        SII=XP(2,NN)
+        ALF=XW(NN)
+C
+C       Assembles B matrix
+C
+        CALL STDM4(JELEM,NNODE,NDOFEL,NTENS,COORDS,MCRD,B,DDET,RII,SII,
+     1             XBAR)
+C
+C       Assembles material matrix and updates state variables
+C
+        CALL UMATELA(DDSDDE,NDI,NTENS,PROPS,NPROPS)
+C
+        CALL MMULT(DDSDDE,NTENS,NTENS,B,NTENS,NDOFEL,AUX1)
+        CALL CLEAR(BT,NDOFEL,NTENS)
+        CALL MTRAN(B,NTENS,NDOFEL,BT)
+C
+C       Assembles stiffness matrix and RHS vector contribution
+C
+        CALL MMULT(BT,NDOFEL,NTENS,AUX1,NTENS,NDOFEL,FRST1)
+C
+C       Considers Gauss weight and Jacobian determinant representing
+C       volume differential.
+C
+        CALL SMULT(FRST1,NDOFEL,NDOFEL,ALF*DDET*XBAR)
+C
+        CALL AMASS4(FRST3,NDOFEL,RII,SII)
+        CALL SMULT(FRST3,NDOFEL,NDOFEL,RO*ALF*DDET*XBAR)
+C
+C       Updates Stiffness matrix and RHS vector
+C
+        CALL UPDMAT(AMATRX,NDOFEL,NDOFEL,FRST1)
+        CALL UPDMAT(AMASS,NDOFEL,NDOFEL,FRST3)
+C
+C       Clears material Jacobian and temporary stiffness matrix
+C       array for new Gauss point 
+C
+        CALL CLEAR(DDSDDE,NTENS,NTENS)
+        CALL CLEAR(FRST1,NDOFEL,NDOFEL)
+        CALL CLEAR(FRST3,NDOFEL,NDOFEL)
+C
+      END DO
+C
+      RETURN
+C      
+      END SUBROUTINE UEL_FEM4
