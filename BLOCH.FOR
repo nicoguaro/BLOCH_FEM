@@ -146,8 +146,8 @@ C         so, they are averaged with their conjugated matrices.
 
 CCCC      SOLUTION  CCCCC
 
-C          CALL GEVALS(SKBLOCH,NDOF-2*NCOND+2,SMBLOCH,NDOF-2*NCOND+2,
-C    1     NEVALS, RBETA)
+C           CALL GEVALS(SKBLOCH,NDOF-2*NCOND+2,SMBLOCH,NDOF-2*NCOND+2,
+C     1     NEVALS, RBETA)
 
 
           CALL GREVALS(SKBLOCH,NDOF-2*NCOND+2,SMBLOCH,NDOF-2*NCOND+2,
