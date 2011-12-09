@@ -436,6 +436,7 @@ C
 C
       END
 C
+C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     SUBROUTINE STDM6:GENERATES THE STRAIN-DISPLACEMENT MATRIX B      C
@@ -496,6 +497,131 @@ C
       RETURN
 C
       END
+C
+C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     SUBROUTINE STDM4:GENERATES THE STRAIN-DISPLACEMENT MATRIX B      C
+C     AND JACOBIAN DETERMINANT DDET AT THE POINT r ,s                  C
+C                                                 i  j                 C
+C     FOR AN 4-NODED 2D ELEMENT-PLANE STRAIN                           C
+C     B    =STRAIN-DISPLACEMENT MATRIX                                 C
+C     DDET =JACOBIAN DETERMINANT                                       C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE STDM4(IDEL,NNE,NDOFEL,NTENS,XX,MCRD,B,DDET,R,S,XBAR)
+C
+      IMPLICIT REAL*8 (A-H,O-Z)
+C
+      PARAMETER (ONE=1.D0,TWO=2.D0,THREE=3.D0,HALF=0.5D0)
+C
+      DIMENSION XX(MCRD,NNE),B(NTENS,NDOFEL),P(2,NNE),AUX1(2,NNE),
+     1          XJ(2,2),XJI(2,2)
+C
+C     Initialize arrays
+C
+      XBAR=ONE
+      CALL CLEAR(B,NTENS,NDOFEL)
+      CALL CLEAR(XJ,2,2)
+      CALL CLEAR(XJI,2,2)
+      CALL CLEAR(P,2,NNE)
+C
+C     Shape functions derivatives w.r.t natural coordinates
+C
+      CALL SFDER4(IELT,NDOFEL,NNE,R,S,P)
+C
+C     Computes the Jacobian operator and its determinant at point (r,s)
+C
+      CALL JACOPER(NNE,XJ,XX,P)
+      DDET=XJ(1,1)*XJ(2,2)-XJ(1,2)*XJ(2,1)
+C
+C     Computes the inverse of the Jacobiam operator
+C
+      CALL JACINVE(XJ,DDET,XJI)
+C
+C     Jacobian Inverse times Shape Functions derivatives w.r.t natural coordinates
+C     to produce shape function derivatives w.r.t x,y coordinates.
+C          
+      CALL MMULT(XJI,2,2,P,2,NNE,AUX1)
+C
+C     Assembles B matrix for a
+C     Cosserat element.
+C
+      DO I=1,NNE
+        II=2*(I-1)+1
+        B(1,II)=AUX1(1,I)
+        B(2,II+1)=AUX1(2,I)
+        B(4,II)=AUX1(2,I)
+        B(4,II+1)=AUX1(1,I)
+      END DO
+C
+      RETURN
+C
+      END SUBROUTINE STDM4
+C
+C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     SUBROUTINE STDM3:GENERATES THE STRAIN-DISPLACEMENT MATRIX B      C
+C     AND JACOBIAN DETERMINANT DDET AT THE POINT r ,s                  C
+C                                                 i  j                 C
+C     FOR AN 3-NODED 2D ELEMENT-PLANE STRAIN                           C
+C     B    =STRAIN-DISPLACEMENT MATRIX                                 C
+C     DDET =JACOBIAN DETERMINANT                                       C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE STDM3(IDEL,NNE,NDOFEL,NTENS,XX,MCRD,B,DDET,R,S,XBAR)
+C
+      IMPLICIT REAL*8 (A-H,O-Z)
+C
+      PARAMETER (ONE=1.D0,TWO=2.D0,THREE=3.D0,HALF=0.5D0)
+C
+      DIMENSION XX(MCRD,NNE),B(NTENS,NDOFEL),P(2,NNE),AUX1(2,NNE),
+     1          XJ(2,2),XJI(2,2)
+C
+C     Initialize arrays
+C
+      XBAR=ONE
+      CALL CLEAR(B,NTENS,NDOFEL)
+      CALL CLEAR(XJ,2,2)
+      CALL CLEAR(XJI,2,2)
+      CALL CLEAR(P,2,NNE)
+C
+C     Shape functions derivatives w.r.t natural coordinates
+C
+      CALL SFDER3(IELT,NDOFEL,NNE,R,S,P)
+C
+C     Computes the Jacobian operator and its determinant at point (r,s)
+C
+      CALL JACOPER(NNE,XJ,XX,P)
+      DDET=XJ(1,1)*XJ(2,2)-XJ(1,2)*XJ(2,1)
+C
+C     Computes the inverse of the Jacobiam operator
+C
+      CALL JACINVE(XJ,DDET,XJI)
+C
+C     Jacobian Inverse times Shape Functions derivatives w.r.t natural coordinates
+C     to produce shape function derivatives w.r.t x,y coordinates.
+C          
+      CALL MMULT(XJI,2,2,P,2,NNE,AUX1)
+C
+C     Assembles B matrix for a
+C     Cosserat element.
+C
+      DO I=1,NNE
+        II=2*(I-1)+1
+        B(1,II)=AUX1(1,I)
+        B(2,II+1)=AUX1(2,I)
+        B(4,II)=AUX1(2,I)
+        B(4,II+1)=AUX1(1,I)
+      END DO
+C
+      RETURN
+C
+      END SUBROUTINE STDM3
+C
 C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
@@ -1084,7 +1210,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
 C                                                                      C
 C      SUBROUTINE AMASS4(MASS,NDOFEL,RII,SII)                          C
-C      Computes the mass matrix for an 9-noded element                 C
+C      Computes the mass matrix for an 4-noded element                 C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
@@ -1124,4 +1250,50 @@ C
       RETURN
 C
       END SUBROUTINE AMASS4
+C
+C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C                                                                      C
+C      SUBROUTINE AMASS3(MASS,NDOFEL,RII,SII)                          C
+C      Computes the mass matrix for an 3-noded element                 C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE AMASS3(AMASS,NDOFEL,RII,SII)
+C
+      IMPLICIT REAL*8(A-H,O-Z)
+C
+      PARAMETER (NTENS=2)
+C
+      DIMENSION SF(NTENS,NDOFEL),SFT(NDOFEL,NTENS),SN(3),
+     1          AUX1(NDOFEL,NDOFEL),AMASS(NDOFEL,NDOFEL)
+C
+      CALL CLEAR(SF,NTENS,NDOFEL)
+      CALL CLEAR(SFT,NDOFEL,NTENS)
+      CALL CLEARV(SN,3)
+      CALL CLEAR(AUX1,NDOFEL,NDOFEL)
+      CALL CLEAR(AMASS,NDOFEL,NDOFEL)
+C
+      CALL SHAPEF3(SN,RII,SII)
+C
+      DO I=1,3
+        KK=2*I-1
+        SF(1,  KK)=SN(I)
+        SF(2,KK+1)=SN(I)
+      END DO
+C
+      CALL MTRAN(SF,NTENS,NDOFEL,SFT)
+      CALL MMULT(SFT,NDOFEL,NTENS,SF,NTENS,NDOFEL,AUX1)
+C
+      DO I=1,NDOFEL
+        DO J=1,NDOFEL
+          AMASS(I,J)=AUX1(I,J)
+        END DO
+      END DO
+C
+      RETURN
+C
+      END SUBROUTINE AMASS3
 C
