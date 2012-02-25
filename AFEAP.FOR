@@ -58,7 +58,7 @@ C                                                                      C
 C         PROBLEM INTEGER ARRAYS                                       C
 C         ----------------------                                       C
 C                                                                      C
-C     ID(:,:)         :EQUATION ASSIGNED TO EACH NODE                 C
+C     ID(:,:)         :EQUATION ASSIGNED TO EACH NODE                  C
 C     IELT(:)         :ELEMENT TYPE ID'S                               C
 C     IELCON(:,:)     :ELEMENT CONNECTIVITIES                          C
 C     NNE(:)          :NUMBER OF NODES ASSIGNED TO EACH ELEMENT        C
@@ -97,7 +97,7 @@ C
 C
       COMPLEX*16 CALPHA
       ALLOCATABLE CALPHA(:),RBETA(:), EIGVALS(:,:)
-      ALLOCATABLE IMNODES_WO(:), IRNODES_WO(:), IMNODES(:), IRNODES(:)
+      ALLOCATABLE IRNODES_WO(:), IMNODES(:), IRNODES(:)
 C
       PARAMETER (ZERO=0.D0,MAXITER=10,TOL=1.0D-7, PI=3.141592653589793)
 C
@@ -208,12 +208,9 @@ C
      1        IMNODES_WO(NCOND_WO),IRNODES_WO(NCOND_WO),IMNODES(NCOND),
      2        IRNODES(NCOND))
 
-
-      READ(IIN,*) (IMNODES_WO(I),I=1,NCOND_WO)
-      READ(IIN,*) (IRNODES_WO(I),I=1,NCOND_WO)
-
       READ(IIN,*) (IMNODES(I),I=1,NCOND)
       READ(IIN,*) (IRNODES(I),I=1,NCOND)
+      READ(IIN,*) (IRNODES_WO(I),I=1,NCOND_WO)
 
 
 C
@@ -230,7 +227,7 @@ C
      2              COORD,LM,NEQ,SKG,SMG,IMSG,JJ)
 C
 
-      CALL BLOCH(NEQ,SKG,SMG,NUMNP,COORD,NCOND_WO,NCOND,IMNODES_WO,
+      CALL BLOCH(NEQ,SKG,SMG,NUMNP,COORD,NCOND_WO,NCOND,
      1           IRNODES_WO,IMNODES,IRNODES,NEVALS,AKXMIN,AKYMIN,
      2           AKXMAX,AKYMAX,NKX,NKY,EIGVALS)
 
