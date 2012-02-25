@@ -73,30 +73,34 @@ C     LOCAL VARIABLES
 
           WRITE(*,*)"kx= ", AKX, "ky= ", AKY
 
-          DO II=1,NCOND_WO         ! Assigning the Phase shifts
-            XI = COORDS(1,IMNODES_WO(II)); YI = COORDS(2,IMNODES_WO(II))
+          DO II=1,NCOND_WO     ! Assigning the Phase shifts for Reference Nodes
             XR = COORDS(1,IRNODES_WO(II)); YR = COORDS(2,IRNODES_WO(II))
-            FI = EXP(XJ*AKX*XI)*EXP(XJ*AKY*YI)
-            FCI= EXP(-XJ*AKX*XI)*EXP(-XJ*AKY*YI)
             FR = EXP(XJ*AKX*XR)*EXP(XJ*AKY*YR)
             FCR= EXP(-XJ*AKX*XR)*EXP(-XJ*AKY*YR)
-            SKAUX(2*IMNODES_WO(II)-1,:)= SKAUX(2*IMNODES_WO(II)-1,:)*FCI ! Stiffness
-            SKAUX(2*IMNODES_WO(II),:)  = SKAUX(2*IMNODES_WO(II),:)*FCI
-            SKAUX(:,2*IMNODES_WO(II)-1)= SKAUX(:,2*IMNODES_WO(II)-1)*FI
-            SKAUX(:,2*IMNODES_WO(II))  = SKAUX(:,2*IMNODES_WO(II))*FI
-            SKAUX(2*IRNODES_WO(II)-1,:)= SKAUX(2*IRNODES_WO(II)-1,:)*FCR
+            SKAUX(2*IRNODES_WO(II)-1,:)= SKAUX(2*IRNODES_WO(II)-1,:)*FCR ! Stiffness
             SKAUX(2*IRNODES_WO(II),:)  = SKAUX(2*IRNODES_WO(II),:)*FCR
             SKAUX(:,2*IRNODES_WO(II)-1)= SKAUX(:,2*IRNODES_WO(II)-1)*FR
             SKAUX(:,2*IRNODES_WO(II))  = SKAUX(:,2*IRNODES_WO(II))*FR
       
-            SMAUX(2*IMNODES_WO(II)-1,:)= SMAUX(2*IMNODES_WO(II)-1,:)*FCI  ! Mass
-            SMAUX(2*IMNODES_WO(II),:)  = SMAUX(2*IMNODES_WO(II),:)*FCI
-            SMAUX(:,2*IMNODES_WO(II)-1)= SMAUX(:,2*IMNODES_WO(II)-1)*FI
-            SMAUX(:,2*IMNODES_WO(II))  = SMAUX(:,2*IMNODES_WO(II))*FI
-            SMAUX(2*IRNODES_WO(II)-1,:)= SMAUX(2*IRNODES_WO(II)-1,:)*FCR
+            SMAUX(2*IRNODES_WO(II)-1,:)= SMAUX(2*IRNODES_WO(II)-1,:)*FCR ! Mass
             SMAUX(2*IRNODES_WO(II),:)  = SMAUX(2*IRNODES_WO(II),:)*FCR
             SMAUX(:,2*IRNODES_WO(II)-1)= SMAUX(:,2*IRNODES_WO(II)-1)*FR
             SMAUX(:,2*IRNODES_WO(II))  = SMAUX(:,2*IRNODES_WO(II))*FR
+          END DO
+
+          DO II=1,NCOND     ! Assigning the Phase shifts for Image Nodes
+            XI = COORDS(1,IMNODES(II)); YI = COORDS(2,IMNODES(II))
+            FI = EXP(XJ*AKX*XI)*EXP(XJ*AKY*YI)
+            FCI= EXP(-XJ*AKX*XI)*EXP(-XJ*AKY*YI)
+            SKAUX(2*IMNODES(II)-1,:)= SKAUX(2*IMNODES(II)-1,:)*FCI ! Stiffness
+            SKAUX(2*IMNODES(II),:)  = SKAUX(2*IMNODES(II),:)*FCI
+            SKAUX(:,2*IMNODES(II)-1)= SKAUX(:,2*IMNODES(II)-1)*FI
+            SKAUX(:,2*IMNODES(II))  = SKAUX(:,2*IMNODES(II))*FI
+      
+            SMAUX(2*IMNODES(II)-1,:)= SMAUX(2*IMNODES(II)-1,:)*FCI ! Mass
+            SMAUX(2*IMNODES(II),:)  = SMAUX(2*IMNODES(II),:)*FCI
+            SMAUX(:,2*IMNODES(II)-1)= SMAUX(:,2*IMNODES(II)-1)*FI
+            SMAUX(:,2*IMNODES(II))  = SMAUX(:,2*IMNODES(II))*FI
           END DO
 
 
