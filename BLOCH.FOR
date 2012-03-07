@@ -75,30 +75,30 @@ C     LOCAL VARIABLES
             XR = COORDS(1,IRNODES_WO(II)); YR = COORDS(2,IRNODES_WO(II))
             FR = EXP(XJ*AKX*XR)*EXP(XJ*AKY*YR)
             FCR= EXP(-XJ*AKX*XR)*EXP(-XJ*AKY*YR)
-            SKAUX(2*IRNODES_WO(II)-1,:)= SKAUX(2*IRNODES_WO(II)-1,:)*FCR ! Stiffness
-            SKAUX(2*IRNODES_WO(II),:)  = SKAUX(2*IRNODES_WO(II),:)*FCR
-            SKAUX(:,2*IRNODES_WO(II)-1)= SKAUX(:,2*IRNODES_WO(II)-1)*FR
-            SKAUX(:,2*IRNODES_WO(II))  = SKAUX(:,2*IRNODES_WO(II))*FR
-      
-            SMAUX(2*IRNODES_WO(II)-1,:)= SMAUX(2*IRNODES_WO(II)-1,:)*FCR ! Mass
-            SMAUX(2*IRNODES_WO(II),:)  = SMAUX(2*IRNODES_WO(II),:)*FCR
-            SMAUX(:,2*IRNODES_WO(II)-1)= SMAUX(:,2*IRNODES_WO(II)-1)*FR
-            SMAUX(:,2*IRNODES_WO(II))  = SMAUX(:,2*IRNODES_WO(II))*FR
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II)-1,FCR) ! Stiffness
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II),FCR)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II)-1,FR)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II),FR)
+
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II)-1,FCR) ! Mass
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II),FCR)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II)-1,FR)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II),FR)
           END DO
 
           DO II=1,NCOND     ! Assigning the Phase shifts for Image Nodes
             XI = COORDS(1,IMNODES(II)); YI = COORDS(2,IMNODES(II))
             FI = EXP(XJ*AKX*XI)*EXP(XJ*AKY*YI)
             FCI= EXP(-XJ*AKX*XI)*EXP(-XJ*AKY*YI)
-            SKAUX(2*IMNODES(II)-1,:)= SKAUX(2*IMNODES(II)-1,:)*FCI ! Stiffness
-            SKAUX(2*IMNODES(II),:)  = SKAUX(2*IMNODES(II),:)*FCI
-            SKAUX(:,2*IMNODES(II)-1)= SKAUX(:,2*IMNODES(II)-1)*FI
-            SKAUX(:,2*IMNODES(II))  = SKAUX(:,2*IMNODES(II))*FI
-      
-            SMAUX(2*IMNODES(II)-1,:)= SMAUX(2*IMNODES(II)-1,:)*FCI ! Mass
-            SMAUX(2*IMNODES(II),:)  = SMAUX(2*IMNODES(II),:)*FCI
-            SMAUX(:,2*IMNODES(II)-1)= SMAUX(:,2*IMNODES(II)-1)*FI
-            SMAUX(:,2*IMNODES(II))  = SMAUX(:,2*IMNODES(II))*FI
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II)-1,FCI) ! Stiffness
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II),FCI)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II)-1,FI)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II),FI)
+
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II)-1,FCI) ! Stiffness
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II),FCI)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II)-1,FI)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II),FI)
           END DO
 
 
@@ -123,7 +123,7 @@ C     LOCAL VARIABLES
           END DO
 
 
-          CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IANODES)
+          CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IANODES) ! Deleting redundant equations
           CALL COLROWDEL(SMAUX,NDOF,NCOND,SMBLOCH,IANODES)
      
 C         The matrices SMBLOCH and SKBLOCH are slightly non-Hermitian
@@ -428,10 +428,10 @@ C
 
  
       CONTII = 1
-      DO II=1,5
+      DO II=1,NA
         IF(COLN(II).EQ.0)THEN
           CONTJJ = 1
-          DO JJ=1,5
+          DO JJ=1,NA
             IF(COLN(JJ).EQ.0)THEN
               B(CONTII,CONTJJ) = A(II,JJ)
               CONTJJ = CONTJJ + 1
@@ -447,5 +447,69 @@ C
 
 C
       END SUBROUTINE COLROWDEL
+C
+C
+C23456789012345678901234567890123456789012345678901234567890123456789012
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C   SUBROUTINE CCOLMULT                                                C
+C                                                                      C
+C    Multiply the COL column of the complex matrix A by a factor FACT, C
+C    the result is stored in the complex matrix B.                     C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE CCOLMULT(A,N,B,COL,FACT)
+C
+      COMPLEX*16 A, B, FACT
+      INTEGER COL
+      DIMENSION A(N,N),B(N,N)
+
+       DO II=1,N
+          DO JJ=1,N
+            IF (JJ.EQ.COL) THEN
+              B(II,JJ) = A(II,JJ)*FACT
+            ELSE
+              B(II,JJ) = A(II,JJ)
+            END IF
+          END DO
+      END DO
+
+      RETURN
+
+      END SUBROUTINE CCOLMULT
+C
+C
+C23456789012345678901234567890123456789012345678901234567890123456789012
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C   SUBROUTINE CROWMULT                                                C
+C                                                                      C
+C    Multiply the ROW row of the complex matrix A by a factor FACT,    C
+C    the result is stored in the complex matrix B.                     C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE CROWMULT(A,N,B,ROW,FACT)
+C
+      COMPLEX*16 A, B, FACT
+      INTEGER ROW
+      DIMENSION A(N,N),B(N,N)
+
+       DO II=1,N
+          DO JJ=1,N
+            IF (II.EQ.ROW) THEN
+              B(II,JJ) = A(II,JJ)*FACT
+            ELSE
+              B(II,JJ) = A(II,JJ)
+            END IF
+          END DO
+      END DO
+
+      RETURN
+
+      END SUBROUTINE CROWMULT
 C
 C
