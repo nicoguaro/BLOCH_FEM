@@ -35,28 +35,26 @@ C
 
 
       DIMENSION SKG(NDOF,NDOF),SMG(NDOF,NDOF),COORDS(2,NCOR),
-     1          IMNODES_WO(NCOND_WO),IRNODES_WO(NCOND_WO),
+     1          IRNODES_WO(NCOND_WO),
      2          IMNODES(NCOND),IRNODES(NCOND)
 
 C     LOCAL VARIABLES
 
-      COMPLEX*16 SKAUX,SMAUX, SKBLOCH, SMBLOCH, FI, FCI, FR, FCR,CALPHA,
+      COMPLEX*16 SKAUX,SMAUX, SKBLOCH, SMBLOCH, FI, FCI, FR, FCR,
      1           XJ, RFACT, BLOCHAUX
       DIMENSION SKAUX(NDOF,NDOF),SMAUX(NDOF,NDOF),
-     1          SKBLOCH(NDOF-2*NCOND_WO,NDOF-2*NCOND_WO),
-     2          SMBLOCH(NDOF-2*NCOND_WO,NDOF-2*NCOND_WO),IANODES(NDOF),
-     3          RBETA(NEVALS),CALPHA(NDOF-2*NCOND_WO),
+     1          SKBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),
+     2          SMBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),IANODES(2*NCOND),
+     3          EVALS(NEVALS),
      4          EIGVALS(NKX*NKY,NEVALS+2),
-     5          RFACT(NDOF-2*NCOND_WO,NDOF-2*NCOND_WO),
-     6          BLOCHAUX(NDOF-2*NCOND_WO,NDOF-2*NCOND_WO)
+     5          BLOCHAUX(NDOF-2*NCOND,NDOF-2*NCOND)
 
       XJ=(0.0,1.0)
-      IANODES = 0
-      SKBLOCH = 0.
-      SMBLOCH = 0.
+      SKBLOCH = 0.0
+      SMBLOCH = 0.0
       DO II=1,NCOND
-        IANODES(2*IMNODES(II)-1) = 1
-        IANODES(2*IMNODES(II)) = 1
+        IANODES(2*II-1) = 2*IMNODES(II)-1
+        IANODES(2*II) = 2*IMNODES(II)
       END DO
 
 
@@ -124,43 +122,38 @@ C     LOCAL VARIABLES
      1                                + SMAUX(:,2*IMNODES(II))
           END DO
 
-          IB = 1      ! Rearranging the Bloch matrices
-          DO II=1,NDOF
-            JB = 1
-            IF(IANODES(II).NE.1)THEN
-             DO JJ=1,NDOF
-                IF(IANODES(JJ).NE.1)THEN
-                  SKBLOCH(IB,JB) = SKAUX(II,JJ)
-                  SMBLOCH(IB,JB) = SMAUX(II,JJ)
-                  JB = JB+1
-                END IF
-              END DO
-              IB = IB+1
-            END IF
-          END DO
 
+          CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IANODES)
+          CALL COLROWDEL(SMAUX,NDOF,NCOND,SMBLOCH,IANODES)
      
 C         The matrices SMBLOCH and SKBLOCH are slightly non-Hermitian
 C         so, they are averaged with their conjugated matrices.
-          CALL MHERMIT(SKBLOCH,NDOF-2*NCOND+2,NDOF-2*NCOND+2,BLOCHAUX) 
+          CALL MHERMIT(SKBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
+     1                 BLOCHAUX)
           SKBLOCH = 1.0/2.0*(SKBLOCH+BLOCHAUX)
-          CALL MHERMIT(SMBLOCH,NDOF-2*NCOND+2,NDOF-2*NCOND+2,BLOCHAUX) 
+          CALL MHERMIT(SMBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
+     1                 BLOCHAUX)
           SMBLOCH = 1.0/2.0*(SMBLOCH+BLOCHAUX)
 
 
 CCCC      SOLUTION  CCCCC
 
-C           CALL GEVALS(SKBLOCH,NDOF-2*NCOND+2,SMBLOCH,NDOF-2*NCOND+2,
-C     1     NEVALS, RBETA)
+C           CALL GEVALS(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
+C     1     NEVALS, EVALS)
 
+C          CALL GREVALS(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
+C     1    NEVALS, EVALS)
 
-          CALL GREVALS(SKBLOCH,NDOF-2*NCOND+2,SMBLOCH,NDOF-2*NCOND+2,
-     1    NEVALS, RBETA)
+          CALL GEVALSN(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
+     1                 NEVALS, EVALS)  ! Solver with no extras
 
-          EIGVALS(ICONT,1) = AKX;  EIGVALS(ICONT,2) = AKY
-          DO II=1, NEVALS
-            EIGVALS(ICONT,II+2) = RBETA(II)
-          END DO
+C          CALL GEVALS(SKAUX,NDOF,SMAUX,NDOF,
+C     1    NEVALS, EVALS)
+
+C          CALL GREVALS(SKAUX,NDOF,SMAUX,NDOF,NEVALS,EVALS)
+
+C          CALL GEVALSN(SKAUX,NDOF,SMAUX,NDOF,
+C     1                 NEVALS, EVALS)  ! Solver with no extras
 
 
           ICONT = ICONT+1
@@ -230,6 +223,52 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
 
       END SUBROUTINE GEVALS
 
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     SUBROUTINE  GEVALSN(A,NRA,B,NRB,NEVALS, EVALS)                   C
+C                                                                      C
+C     Solves the Complex Generalized EigenValue Problem                C
+C       A*x = lambda*B*x                                               C
+C                                                                      C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     AUTHOR: NICOLAS GUARIN Z.                                        C
+C     GRUPO DE MECANICA APLICADA- UNIVERSIDAD EAFIT                    C
+C     LAST MOD: 07 MARCH 2012                                          C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+      SUBROUTINE GEVALSN(A,NRA,B,NRB,NEVALS, EVALS)
+
+
+      IMPLICIT REAL*8(A-H,O-Z)
+
+      COMPLEX*16 A, B, ALPHA, BETA
+
+      DIMENSION A(NRA,NRA), B(NRB,NRB), ALPHA(NRA), BETA(NRA),
+     1          EVALS(NEVALS)
+
+
+      CALL DGVLCG(NRA, A, NRA, B, NRB, ALPHA, BETA)
+
+      DO I=1,NRA
+        ALPHA(I) = ALPHA(I)/BETA(I)
+      END DO
+
+      CALL DSVRGN (NRA, ALPHA, ALPHA)  ! Sort the vector
+
+      DO I=1,NEVALS
+        EVALS(I) = ALPHA(I)
+      END DO
+
+      RETURN
+
+      END SUBROUTINE GEVALSN
+
+
 
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -259,10 +298,11 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
 
       IMPLICIT REAL*8(A-H,O-Z)
 
-      COMPLEX*16 A, B
+      COMPLEX*16 A, B, ALPHA, BETA
 
       DIMENSION A(NRA,NRA),B(NRB,NRB),RA(2*NRA,2*NRA),RB(2*NRB,2*NRB),
-     1          EVALS(NEVALS),EVAUX(2*NEVALS), ALLEV(2*NRA)
+     1          EVALS(NEVALS),EVAUX(2*NEVALS), ALLEV(2*NRA),
+     2          ALPHA(NRA), BETA(NRA)
 
 
 C     Rewriting the complex A matrix as a real matrix
@@ -278,7 +318,6 @@ C     Rewriting the complex B matrix as a real matrix
       RB(NRB+1:2*NRB,NRB+1:2*NRB) = REAL(B)
 
       
-
       CALL DGVLSP(2*NRA, RA, 2*NRA, RB, 2*NRB, ALLEV)
 
       CALL DSVRGN (2*NRA, ALLEV, ALLEV)  ! Sort the vector
@@ -354,5 +393,59 @@ C
       RETURN
 C
       END SUBROUTINE MHERMIT
+C
+C
+C23456789012345678901234567890123456789012345678901234567890123456789012
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C   SUBROUTINE COLROWDEL(A,NA,NRED,B,COLS)                             C
+C                                                                      C
+C    Delete NRED rows and columns from the matrix A and returns the    C
+C    submatrix B. COLS are the columns/rows to be deleted.             C
+C    NA is the dimension of A.                                         C
+C                                                                      C
+C    Both matrices, A and B are complex.
+C                                                                      C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE COLROWDEL(A,NA,NRED,B,COLS)
+C
+      COMPLEX*16 A, B
+
+      INTEGER COLS, COLN, CONT, CONTII, CONTJJ
+C
+      DIMENSION A(NA,NA),B(NA-NRED,NA-NRED), COLS(NRED), COLN(NA)
+
+      COLN = 0
+
+      DO II=1,NRED
+        COLN(COLS(II)) = 1
+      END DO
+
+C
+
+ 
+      CONTII = 1
+      DO II=1,5
+        IF(COLN(II).EQ.0)THEN
+          CONTJJ = 1
+          DO JJ=1,5
+            IF(COLN(JJ).EQ.0)THEN
+              B(CONTII,CONTJJ) = A(II,JJ)
+              CONTJJ = CONTJJ + 1
+            END IF
+          END DO
+         CONTII = CONTII +1
+        END IF
+
+      END DO
+
+
+      RETURN
+
+C
+      END SUBROUTINE COLROWDEL
 C
 C
