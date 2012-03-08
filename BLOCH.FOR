@@ -72,56 +72,50 @@ C     LOCAL VARIABLES
           WRITE(*,*)"kx= ", AKX, "ky= ", AKY
 
           DO II=1,NCOND_WO     ! Assigning the Phase shifts for Reference Nodes
-            XR = COORDS(1,IRNODES_WO(II)); YR = COORDS(2,IRNODES_WO(II))
+            IR = IRNODES_WO(II)
+            XR = COORDS(1,IR); YR = COORDS(2,IR)
             FR = EXP(XJ*AKX*XR)*EXP(XJ*AKY*YR)
             FCR= EXP(-XJ*AKX*XR)*EXP(-XJ*AKY*YR)
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II)-1,FCR) ! Stiffness
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II),FCR)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II)-1,FR)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IRNODES_WO(II),FR)
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IR-1,FCR) ! Stiffness
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IR,FCR)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IR-1,FR)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IR,FR)
 
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II)-1,FCR) ! Mass
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II),FCR)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II)-1,FR)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IRNODES_WO(II),FR)
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IR-1,FCR) ! Mass
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IR,FCR)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR-1,FR)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR,FR)
           END DO
 
           DO II=1,NCOND     ! Assigning the Phase shifts for Image Nodes
-            XI = COORDS(1,IMNODES(II)); YI = COORDS(2,IMNODES(II))
+            IM = IMNODES(II)
+            XI = COORDS(1,IM); YI = COORDS(2,IM)
             FI = EXP(XJ*AKX*XI)*EXP(XJ*AKY*YI)
             FCI= EXP(-XJ*AKX*XI)*EXP(-XJ*AKY*YI)
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II)-1,FCI) ! Stiffness
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II),FCI)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II)-1,FI)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IMNODES(II),FI)
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IM-1,FCI) ! Stiffness
+            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IM,FCI)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IM-1,FI)
+            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IM,FI)
 
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II)-1,FCI) ! Stiffness
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II),FCI)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II)-1,FI)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IMNODES(II),FI)
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IM-1,FCI) ! Stiffness
+            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IM,FCI)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IM-1,FI)
+            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IM,FI)
           END DO
 
 
           DO II=1,NCOND            ! Summing rows and columns
-            SKAUX(2*IRNODES(II)-1,:)=SKAUX(2*IRNODES(II)-1,:)  ! Stiffness
-     1                                + SKAUX(2*IMNODES(II)-1,:)
-            SKAUX(2*IRNODES(II),:)  =SKAUX(2*IRNODES(II),:)
-     1                                + SKAUX(2*IMNODES(II),:)
-            SKAUX(:,2*IRNODES(II)-1)=SKAUX(:,2*IRNODES(II)-1)
-     1                                + SKAUX(:,2*IMNODES(II)-1)
-            SKAUX(:,2*IRNODES(II))  =SKAUX(:,2*IRNODES(II))
-     1                                + SKAUX(:,2*IMNODES(II))
-     
-            SMAUX(2*IRNODES(II)-1,:)=SMAUX(2*IRNODES(II)-1,:)  ! Mass
-     1                                + SMAUX(2*IMNODES(II)-1,:)
-            SMAUX(2*IRNODES(II),:)  =SMAUX(2*IRNODES(II),:)
-     1                                + SMAUX(2*IMNODES(II),:)
-            SMAUX(:,2*IRNODES(II)-1)=SMAUX(:,2*IRNODES(II)-1)
-     1                                + SMAUX(:,2*IMNODES(II)-1)
-            SMAUX(:,2*IRNODES(II))  =SMAUX(:,2*IRNODES(II))
-     1                                + SMAUX(:,2*IMNODES(II))
-          END DO
+            IR = IRNODES(II); IM = IMNODES(II)
+            CALL CROWADD(SKAUX,NDOF,SKAUX,2*IM-1,2*IR-1) ! Stiffness
+            CALL CROWADD(SKAUX,NDOF,SKAUX,2*IM,2*IR)
+            CALL CCOLADD(SKAUX,NDOF,SKAUX,2*IM-1,2*IR-1)
+            CALL CCOLADD(SKAUX,NDOF,SKAUX,2*IM,2*IR)
 
+            CALL CROWADD(SMAUX,NDOF,SMAUX,2*IM-1,2*IR-1) ! Mass
+            CALL CROWADD(SMAUX,NDOF,SMAUX,2*IM,2*IR)
+            CALL CCOLADD(SMAUX,NDOF,SMAUX,2*IM-1,2*IR-1)
+            CALL CCOLADD(SMAUX,NDOF,SMAUX,2*IM,2*IR)
+          END DO
 
           CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IANODES) ! Deleting redundant equations
           CALL COLROWDEL(SMAUX,NDOF,NCOND,SMBLOCH,IANODES)
@@ -154,6 +148,8 @@ C          CALL GREVALS(SKAUX,NDOF,SMAUX,NDOF,NEVALS,EVALS)
 
 C          CALL GEVALSN(SKAUX,NDOF,SMAUX,NDOF,
 C     1                 NEVALS, EVALS)  ! Solver with no extras
+
+
 
 
           ICONT = ICONT+1
@@ -413,9 +409,7 @@ C
       SUBROUTINE COLROWDEL(A,NA,NRED,B,COLS)
 C
       COMPLEX*16 A, B
-
       INTEGER COLS, COLN, CONT, CONTII, CONTJJ
-C
       DIMENSION A(NA,NA),B(NA-NRED,NA-NRED), COLS(NRED), COLN(NA)
 
       COLN = 0
@@ -424,9 +418,6 @@ C
         COLN(COLS(II)) = 1
       END DO
 
-C
-
- 
       CONTII = 1
       DO II=1,NA
         IF(COLN(II).EQ.0)THEN
@@ -441,7 +432,6 @@ C
         END IF
 
       END DO
-
 
       RETURN
 
@@ -511,5 +501,69 @@ C
       RETURN
 
       END SUBROUTINE CROWMULT
+C
+C
+C23456789012345678901234567890123456789012345678901234567890123456789012
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C   SUBROUTINE CROWADD                                                 C
+C                                                                      C
+C    PENDING...                                                        C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE CROWADD(A,N,B,ROW1,ROW2)
+
+      COMPLEX*16 A, B
+      INTEGER ROW1, ROW2
+      DIMENSION A(N,N),B(N,N)
+ 
+      DO II=1,N
+          DO JJ=1,N
+            IF (II.EQ.ROW2) THEN
+              B(II,JJ) = A(II,JJ) + A(ROW1,JJ)
+
+            ELSE
+              B(II,JJ) = A(II,JJ)
+            END IF
+          END DO
+      END DO
+
+      RETURN
+
+      SUBROUTINE CROWADD
+C
+C
+C23456789012345678901234567890123456789012345678901234567890123456789012
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C   SUBROUTINE CCOLADD                                                 C
+C                                                                      C
+C    PENDING...                                                        C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+C
+      SUBROUTINE CCOLADD(A,N,B,COL1,COL2)
+
+      COMPLEX*16 A, B
+      INTEGER COL1, COL2
+      DIMENSION A(N,N),B(N,N)
+ 
+      DO II=1,N
+          DO JJ=1,N
+            IF (JJ.EQ.COL2) THEN
+              B(II,JJ) = A(II,JJ) + A(II,COL1)
+
+            ELSE
+              B(II,JJ) = A(II,JJ)
+            END IF
+          END DO
+      END DO
+
+      RETURN
+
+      SUBROUTINE CCOLADD
 C
 C
