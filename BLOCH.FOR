@@ -150,7 +150,9 @@ C          CALL GEVALSN(SKAUX,NDOF,SMAUX,NDOF,
 C     1                 NEVALS, EVALS)  ! Solver with no extras
 
 
-
+          EIGVALS(ICONT,1) = AKX
+          EIGVALS(ICONT,2) = AKY
+          EIGVALS(ICONT,3:NEVALS+2) = EVALS
 
           ICONT = ICONT+1
 
