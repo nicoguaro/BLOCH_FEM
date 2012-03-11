@@ -41,13 +41,12 @@ C
 C     LOCAL VARIABLES
 
       COMPLEX*16 SKAUX,SMAUX, SKBLOCH, SMBLOCH, FI, FCI, FR, FCR,
-     1           XJ, RFACT, BLOCHAUX
+     1           XJ, RFACT
       DIMENSION SKAUX(NDOF,NDOF),SMAUX(NDOF,NDOF),
      1          SKBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),
      2          SMBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),IANODES(2*NCOND),
      3          EVALS(NEVALS),
-     4          EIGVALS(NKX*NKY,NEVALS+2),
-     5          BLOCHAUX(NDOF-2*NCOND,NDOF-2*NCOND)
+     4          EIGVALS(NKX*NKY,NEVALS+2)
 
       XJ=(0.0,1.0)
       SKBLOCH = 0.0
@@ -71,63 +70,9 @@ C     LOCAL VARIABLES
 
           WRITE(*,*)"kx= ", AKX, "ky= ", AKY
 
-          DO II=1,NCOND_WO     ! Assigning the Phase shifts for Reference Nodes
-            IR = IRNODES_WO(II)
-            XR = COORDS(1,IR); YR = COORDS(2,IR)
-            FR = EXP(XJ*AKX*XR)*EXP(XJ*AKY*YR)
-            FCR= EXP(-XJ*AKX*XR)*EXP(-XJ*AKY*YR)
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IR-1,FCR) ! Stiffness
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IR,FCR)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IR-1,FR)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IR,FR)
-
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IR-1,FCR) ! Mass
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IR,FCR)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR-1,FR)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR,FR)
-          END DO
-
-          DO II=1,NCOND     ! Assigning the Phase shifts for Image Nodes
-            IM = IMNODES(II)
-            XI = COORDS(1,IM); YI = COORDS(2,IM)
-            FI = EXP(XJ*AKX*XI)*EXP(XJ*AKY*YI)
-            FCI= EXP(-XJ*AKX*XI)*EXP(-XJ*AKY*YI)
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IM-1,FCI) ! Stiffness
-            CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IM,FCI)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IM-1,FI)
-            CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IM,FI)
-
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IM-1,FCI) ! Stiffness
-            CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IM,FCI)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IM-1,FI)
-            CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IM,FI)
-          END DO
-
-
-          DO II=1,NCOND            ! Summing rows and columns
-            IR = IRNODES(II); IM = IMNODES(II)
-            CALL CROWADD(SKAUX,NDOF,SKAUX,2*IM-1,2*IR-1) ! Stiffness
-            CALL CROWADD(SKAUX,NDOF,SKAUX,2*IM,2*IR)
-            CALL CCOLADD(SKAUX,NDOF,SKAUX,2*IM-1,2*IR-1)
-            CALL CCOLADD(SKAUX,NDOF,SKAUX,2*IM,2*IR)
-
-            CALL CROWADD(SMAUX,NDOF,SMAUX,2*IM-1,2*IR-1) ! Mass
-            CALL CROWADD(SMAUX,NDOF,SMAUX,2*IM,2*IR)
-            CALL CCOLADD(SMAUX,NDOF,SMAUX,2*IM-1,2*IR-1)
-            CALL CCOLADD(SMAUX,NDOF,SMAUX,2*IM,2*IR)
-          END DO
-
-          CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IANODES) ! Deleting redundant equations
-          CALL COLROWDEL(SMAUX,NDOF,NCOND,SMBLOCH,IANODES)
-     
-C         The matrices SMBLOCH and SKBLOCH are slightly non-Hermitian
-C         so, they are averaged with their conjugated matrices.
-          CALL MHERMIT(SKBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
-     1                 BLOCHAUX)
-          SKBLOCH = 1.0/2.0*(SKBLOCH+BLOCHAUX)
-          CALL MHERMIT(SMBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
-     1                 BLOCHAUX)
-          SMBLOCH = 1.0/2.0*(SMBLOCH+BLOCHAUX)
+          CALL BLOCH_BC(SKAUX,SMAUX,NDOF,COORDS,NCOND,NCOND_WO,  ! Bloch BC Imposition
+     1                  NCOR,AKX,AKY,IRNODES,IRNODES_WO,
+     2                  IMNODES,IANODES,SKBLOCH,SMBLOCH)
 
 
 CCCC      SOLUTION  CCCCC
@@ -166,7 +111,104 @@ C     1                 NEVALS, EVALS)  ! Solver with no extras
 
       END SUBROUTINE BLOCH
 
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     SUBROUTINE  BLOCH_BC(A,NRA,B,NRB,NEVALS, EVALS)                  C
+C                                                                      C
+C     Pending...                                                       C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     AUTHOR: NICOLAS GUARIN Z.                                        C
+C     GRUPO DE MECANICA APLICADA- UNIVERSIDAD EAFIT                    C
+C     LAST MOD: 05 MARCH 2012                                          C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+      SUBROUTINE BLOCH_BC(SKAUX,SMAUX,NDOF,COORDS,NCOND,NCOND_WO,
+     1                    NCOR,AKX,AKY,IRNODES,IRNODES_WO,
+     2                    IMNODES,IANODES,SKBLOCH,SMBLOCH)
 
+
+      IMPLICIT REAL*8(A-H,O-Z)
+
+      COMPLEX*16 SKAUX, SMAUX, SKBLOCH, SMBLOCH,FI, FCI, FR,
+     1           FCR, XJ, BLOCHAUX
+
+      DIMENSION SKAUX(NDOF,NDOF), SMAUX(NDOF,NDOF),
+     1          SKBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),
+     2          SMBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),
+     3          IANODES(2*NCOND),COORDS(2,NCOR),
+     4          IRNODES_WO(NCOND_WO),
+     5          IMNODES(NCOND),IRNODES(NCOND),
+     6          BLOCHAUX(NDOF-2*NCOND,NDOF-2*NCOND)
+
+      XJ=(0.0,1.0)
+
+
+      DO II=1,NCOND_WO     ! Assigning the Phase shifts for Reference Nodes
+        IR = IRNODES_WO(II)
+        XR = COORDS(1,IR); YR = COORDS(2,IR)
+        FR = EXP(XJ*AKX*XR)*EXP(XJ*AKY*YR)
+        FCR= EXP(-XJ*AKX*XR)*EXP(-XJ*AKY*YR)
+        CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IR-1,FCR) ! Stiffness
+        CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IR,FCR)
+        CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IR-1,FR)
+        CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IR,FR)
+
+        CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IR-1,FCR) ! Mass
+        CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IR,FCR)
+        CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR-1,FR)
+        CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR,FR)
+	END DO
+
+      DO II=1,NCOND     ! Assigning the Phase shifts for Image Nodes
+        IM = IMNODES(II)
+        XI = COORDS(1,IM); YI = COORDS(2,IM)
+        FI = EXP(XJ*AKX*XI)*EXP(XJ*AKY*YI)
+        FCI= EXP(-XJ*AKX*XI)*EXP(-XJ*AKY*YI)
+        CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IM-1,FCI) ! Stiffness
+        CALL CROWMULT(SKAUX,NDOF,SKAUX,2*IM,FCI)
+        CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IM-1,FI)
+        CALL CCOLMULT(SKAUX,NDOF,SKAUX,2*IM,FI)
+
+        CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IM-1,FCI) ! Mass
+        CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IM,FCI)
+        CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IM-1,FI)
+        CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IM,FI)
+      END DO
+
+
+      DO II=1,NCOND            ! Summing rows and columns
+        IR = IRNODES(II); IM = IMNODES(II)
+        CALL CROWADD(SKAUX,NDOF,SKAUX,2*IM-1,2*IR-1) ! Stiffness
+        CALL CROWADD(SKAUX,NDOF,SKAUX,2*IM,2*IR)
+        CALL CCOLADD(SKAUX,NDOF,SKAUX,2*IM-1,2*IR-1)
+        CALL CCOLADD(SKAUX,NDOF,SKAUX,2*IM,2*IR)
+
+        CALL CROWADD(SMAUX,NDOF,SMAUX,2*IM-1,2*IR-1) ! Mass
+        CALL CROWADD(SMAUX,NDOF,SMAUX,2*IM,2*IR)
+        CALL CCOLADD(SMAUX,NDOF,SMAUX,2*IM-1,2*IR-1)
+        CALL CCOLADD(SMAUX,NDOF,SMAUX,2*IM,2*IR)
+      END DO
+
+      CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IANODES) ! Deleting redundant equations
+      CALL COLROWDEL(SMAUX,NDOF,NCOND,SMBLOCH,IANODES)
+     
+C      The matrices SMBLOCH and SKBLOCH are slightly non-Hermitian
+C      so, they are averaged with their conjugated matrices.
+      CALL MHERMIT(SKBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
+     1             BLOCHAUX)
+      SKBLOCH = 1.0/2.0*(SKBLOCH+BLOCHAUX)
+      CALL MHERMIT(SMBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
+     1                 BLOCHAUX)
+      SMBLOCH = 1.0/2.0*(SMBLOCH+BLOCHAUX)
+
+      RETURN
+
+      END SUBROUTINE BLOCH_BC
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
