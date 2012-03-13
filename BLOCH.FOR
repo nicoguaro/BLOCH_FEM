@@ -70,21 +70,25 @@ C     LOCAL VARIABLES
 
           WRITE(*,*)"kx= ", AKX, "ky= ", AKY
 
-          CALL BLOCH_BC(SKAUX,SMAUX,NDOF,COORDS,NCOND,NCOND_WO,  ! Bloch BC Imposition
+C          CALL BLOCH_BC(SKAUX,SMAUX,NDOF,COORDS,NCOND,NCOND_WO,  ! Bloch BC Imposition
+C     1                  NCOR,AKX,AKY,IRNODES,IRNODES_WO,
+C     2                  IMNODES,IANODES,SKBLOCH,SMBLOCH)
+
+
+          CALL BLOCH_BC2(SKAUX,SMAUX,NDOF,COORDS,NCOND,NCOND_WO,  ! Bloch BC Imposition
      1                  NCOR,AKX,AKY,IRNODES,IRNODES_WO,
      2                  IMNODES,IANODES,SKBLOCH,SMBLOCH)
-
 
 CCCC      SOLUTION  CCCCC
 
 C           CALL GEVALS(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
 C     1     NEVALS, EVALS)
 
-C          CALL GREVALS(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
-C     1    NEVALS, EVALS)
+          CALL GREVALS(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
+     1    NEVALS, EVALS)
 
-          CALL GEVALSN(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
-     1                 NEVALS, EVALS)  ! Solver with no extras
+C          CALL GEVALSN(SKBLOCH,NDOF-2*NCOND,SMBLOCH,NDOF-2*NCOND,
+C     1                 NEVALS, EVALS)  ! Solver with no extras
 
 C          CALL GEVALS(SKAUX,NDOF,SMAUX,NDOF,
 C     1    NEVALS, EVALS)
@@ -115,7 +119,7 @@ C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
-C     SUBROUTINE  BLOCH_BC(A,NRA,B,NRB,NEVALS, EVALS)                  C
+C     SUBROUTINE  BLOCH_BC()                                           C
 C                                                                      C
 C     Pending...                                                       C
 C                                                                      C
@@ -123,7 +127,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     AUTHOR: NICOLAS GUARIN Z.                                        C
 C     GRUPO DE MECANICA APLICADA- UNIVERSIDAD EAFIT                    C
-C     LAST MOD: 05 MARCH 2012                                          C
+C     LAST MOD: 11 MARCH 2012                                          C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
@@ -162,7 +166,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
         CALL CROWMULT(SMAUX,NDOF,SMAUX,2*IR,FCR)
         CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR-1,FR)
         CALL CCOLMULT(SMAUX,NDOF,SMAUX,2*IR,FR)
-	END DO
+      END DO
 
       DO II=1,NCOND     ! Assigning the Phase shifts for Image Nodes
         IM = IMNODES(II)
@@ -209,6 +213,112 @@ C      so, they are averaged with their conjugated matrices.
       RETURN
 
       END SUBROUTINE BLOCH_BC
+C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     SUBROUTINE  BLOCH_BC2()                                          C
+C                                                                      C
+C     Pending...                                                       C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                                                      C
+C     AUTHOR: NICOLAS GUARIN Z.                                        C
+C     GRUPO DE MECANICA APLICADA- UNIVERSIDAD EAFIT                    C
+C     LAST MOD: 11 MARCH 2012                                          C
+C                                                                      C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C23456789012345678901234567890123456789012345678901234567890123456789012
+      SUBROUTINE BLOCH_BC2(SKAUX,SMAUX,NDOF,COORDS,NCOND,NCOND_WO,
+     1                    NCOR,AKX,AKY,IRNODES,IRNODES_WO,
+     2                    IMNODES,IANODES,SKBLOCH,SMBLOCH)
+
+
+      IMPLICIT REAL*8(A-H,O-Z)
+
+      INTEGER CONT
+
+      COMPLEX*16 SKAUX, SMAUX, SKBLOCH, SMBLOCH,FAC,
+     1           FCR, XJ, BLOCHAUX,TMAT,THMAT, MAUX
+
+      DIMENSION SKAUX(NDOF,NDOF), SMAUX(NDOF,NDOF),
+     1          SKBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),
+     2          SMBLOCH(NDOF-2*NCOND,NDOF-2*NCOND),
+     3          IANODES(2*NCOND),COORDS(2,NCOR),
+     4          IRNODES_WO(NCOND_WO),
+     5          IMNODES(NCOND),IRNODES(NCOND),
+     6          BLOCHAUX(NDOF-2*NCOND,NDOF-2*NCOND),
+     7          TMAT(NDOF,NDOF-2*NCOND),
+     7          THMAT(NDOF-2*NCOND,NDOF),
+     8          INDEXVEC(NDOF),INDEXREF(NDOF),
+     9          MAUX(NDOF,NDOF-2*NCOND)
+
+      XJ=(0.0,1.0)
+
+
+      INDEXVEC = 0
+      DO I=1,NCOND
+        INDEXVEC(2*IMNODES(I)-1) = -(2*IRNODES(I)-1)
+        INDEXVEC(2*IMNODES(I)) = -2*IRNODES(I)
+      END DO
+      INDEXREF = - INDEXVEC
+
+      DO I=1,NDOF
+        CONT = 0
+        DO J=1,NCOND
+          IF (INDEXVEC(I)<0)THEN
+            IF( 2*IMNODES(J)<ABS(INDEXVEC(I)) )THEN
+              CONT = CONT + 1
+            END IF
+          ELSEIF (2*IMNODES(J)<I)THEN
+            CONT = CONT + 1
+          END IF
+        END DO
+        IF(INDEXVEC(I)<0)THEN
+          INDEXVEC(I) = INDEXVEC(I) + 2*CONT
+        ELSE
+          INDEXVEC(I) = I - 2*CONT
+        END IF
+      END DO
+
+      TMAT = 0
+      DO I=1,NDOF
+        IF(INDEXVEC(I)>0)THEN
+          J = INDEXVEC(I)
+          TMAT(I,J) = 1
+        ELSE
+          J = ABS(INDEXVEC(I))
+          IR = (INDEXREF(I)+1)/2; IM = (I+1)/2
+          XI = COORDS(1,IM); YI = COORDS(2,IM)
+          XR = COORDS(1,IR); YR = COORDS(2,IR)
+          FAC = EXP(XJ*AKX*(XI-XR))*EXP(XJ*AKY*(YI-YR))
+          TMAT(I,J) = FAC
+        END IF
+      END DO
+
+      CALL MHERMIT(TMAT,NDOF,NDOF-2*NCOND,THMAT)
+      CALL CMMULT(SKAUX,NDOF,NDOF,TMAT,NDOF,NDOF-2*NCOND,MAUX)
+      CALL CMMULT(THMAT,NDOF-2*NCOND,NDOF,MAUX,NDOF,NDOF-2*NCOND,
+     1            SKBLOCH)
+      CALL CMMULT(SMAUX,NDOF,NDOF,TMAT,NDOF,NDOF-2*NCOND,MAUX)
+      CALL CMMULT(THMAT,NDOF-2*NCOND,NDOF,MAUX,NDOF,NDOF-2*NCOND,
+     1            SMBLOCH)
+
+
+C      The matrices SMBLOCH and SKBLOCH are slightly non-Hermitian
+C      so, they are averaged with their conjugated matrices.
+      CALL MHERMIT(SKBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
+     1             BLOCHAUX)
+      SKBLOCH = 1.0/2.0*(SKBLOCH+BLOCHAUX)
+      CALL MHERMIT(SMBLOCH,NDOF-2*NCOND,NDOF-2*NCOND,
+     1                 BLOCHAUX)
+      SMBLOCH = 1.0/2.0*(SMBLOCH+BLOCHAUX)
+      
+      RETURN
+
+      END SUBROUTINE BLOCH_BC2
+C   
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
