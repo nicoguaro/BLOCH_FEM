@@ -225,17 +225,7 @@ C
      1              IELT,IELCON,NDOFN,NDOFEL,MATP,NMATP,NMPR,AMATE,
      2              COORD,LM,NEQ,SKG,SMG,IMSG,JJ)
 
-C      OPEN(10,FILE='KO.txt')
-C      OPEN(11,FILE='MO.txt')
-C      
-C      DO II=1,NEQ
-C        DO JJ=1,NEQ
-C          WRITE(10,*),SKG(II,JJ)
-C          WRITE(11,*),SMG(II,JJ)
-C        END DO
-C      END DO
 
-C
 
       CALL BLOCH(NEQ,SKG,SMG,NUMNP,COORD,NCOND_WO,NCOND,
      1           IRNODES_WO,IMNODES,IRNODES,NEVALS,AKXMIN,AKYMIN,
