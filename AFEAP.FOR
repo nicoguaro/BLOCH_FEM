@@ -232,7 +232,9 @@ C
      2           AKXMAX,AKYMAX,NKX,NKY,EIGVALS)
 
       DO II=1,NKX*NKY
-          WRITE(IFRQ,*), (EIGVALS(II,JJ),JJ=1,NEVALS+2)
+        DO JJ=1,NEVALS+2
+          WRITE(IFRQ,*), EIGVALS(II,JJ)
+        END DO
       END DO
 
 C
