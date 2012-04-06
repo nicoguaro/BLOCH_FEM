@@ -69,7 +69,9 @@ C     LOCAL VARIABLES
           SKAUX = SKG
           SMAUX = SMG
 
-          WRITE(*,*)"kx= ", AKX, "ky= ", AKY
+          WRITE(*,100) ICONT, NKX*NKY, AKX, AKY
+100       FORMAT(I5,'/',I5,' kx= ',F6.4,' ky= ',F6.4)
+
 
           CALL BLOCH_BC(SKAUX,SMAUX,NDOF,COORDS,NCOND,NCOND_WO,  ! Bloch BC Imposition
      1                  NCOR,AKX,AKY,IRNODES,IRNODES_WO,
