@@ -191,7 +191,6 @@ C      Real matrix times vector                                        C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
-C
       SUBROUTINE MAVEC(A,NRA,NCA,B,C)
 C
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -219,7 +218,6 @@ C      Matrix times a real scalar                                      C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
-C
       SUBROUTINE SMULT(A,NR,NC,S)
 C
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -246,7 +244,6 @@ C      Matrix times an integer                                         C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
-C
       SUBROUTINE SMULTI(A,NR,NC,JJ)
 C
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -273,7 +270,6 @@ C      Updates an existing matrix with an incremental matrix.          C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
-C
       SUBROUTINE UPDMAT(A,NR,NC,B)
 C
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -450,7 +446,6 @@ C     SUBROUTINE VECHAN3D4D                                            C
 C     IFLAG=0 =  3D-->4D                                               C
 C     IFLAG=1 =  4D-->3D                                               C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-C
       SUBROUTINE VECHAN3D4D(RV4D,ID1,ID2,ID3,ID4,ICOL,RV3D,JD1,JD2,JD3,
      1IFLAG)
 C
@@ -487,7 +482,6 @@ C     SUBROUTINE VECHAN2D3D                                            C
 C     IFLAG=0 =  2D-->3D                                               C
 C     IFLAG=1 =  3D-->2D                                               C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-C
       SUBROUTINE VECHAN2D3D(RV3D,ID1,ID2,ID3,ICOL,RV2D,JD1,JD2,IFLAG)
 C
       IMPLICIT REAL*8(A-H,O-Z)
@@ -686,7 +680,7 @@ C
         DO J=1,N
           IF(ABS(A(I,J)).GT.AAMAX) AAMAX=ABS(A(I,J))
         END DO
-        IF(AAMAX.EQ.0.) PAUSE 'SINGULAR MATRIX IN LUDCMP'
+cc        IF(AAMAX.EQ.0.) PAUSE 'SINGULAR MATRIX IN LUDCMP'
         VV(I)=ONE/AAMAX
       END DO
 C

@@ -3,47 +3,50 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     SUBROUTINE BLOCH                                                 C
 C                                                                      C
-C     Read the couple of DOF with bloch-periodicity constraints        C
+C     Read the couple of nodes with bloch-periodicity constraints      C
 C                                                                      C
 C                                                                      C
-C     NCOND       :NUMBER OF CONSTRAINTS BETWEEN DOF                   C
-C     IMDOF       :IMAGE DOF                                           C
-C     IRDOF       :REFERENCES DOF                                      C
+C     NCOND       :NUMBER OF NODAL CONSTRAINTS                         C
+C     IMNODES     :IMAGE NODES                                         C
+C     IRNODES     :REFERENCES NODES                                    C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C                                                                      C
 C     AUTHOR: NICOLAS GUARIN Z.                                        C
 C     GRUPO DE MECANICA APLICADA- UNIVERSIDAD EAFIT                    C
-C     LAST MOD: 20 AUGUST 2012                                         C
+C     LAST MOD: 08 AUGUST 2012                                         C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
 C
-      SUBROUTINE BLOCH(NDOF,SKG,SMG,NCOR,COORDS,IDOFCOOR,NCON_WO,NCON,
-     1           IRDOF_WO,IMDOF,IRDOF,NEVALS,AKXMIN,
+      SUBROUTINE BLOCH(NDOF,SKG,SMG,NCOR,COORDS,NCOND_WO,NCOND,
+     1           IRNODES_WO,IMNODES,IRNODES,NEVALS,AKXMIN,
      2           AKYMIN,AKXMAX,AKYMAX,NKX,NKY,EIGVALS)
 
       IMPLICIT REAL*8(A-H,O-Z)
       PARAMETER (PI = 3.141592653589793)
 
       DIMENSION SKG(NDOF,NDOF),SMG(NDOF,NDOF),COORDS(2,NCOR),
-     1          IRDOF_WO(NCON_WO),
-     2          IMDOF(NCON),IRDOF(NCON),
-     3          EIGVALS(NKX*NKY,NEVALS+2),
-     4          IDOFCOOR(NDOF)
+     1          IRNODES_WO(NCOND_WO),
+     2          IMNODES(NCOND),IRNODES(NCOND),
+     3          EIGVALS(NKX*NKY,NEVALS+2)
 
 C     LOCAL VARIABLES
       COMPLEX*16 SAUX, SKBLOCH, SMBLOCH, XJ, WORK
       DIMENSION SAUX(NDOF,NDOF),
-     1          SKBLOCH(NDOF - NCON,NDOF - NCON),
-     2          SMBLOCH(NDOF - NCON,NDOF - NCON),
-     3          EVALS(NDOF - NCON),
-     4          RWORK(3*(NDOF - NCON)-2), WORK(2*(NDOF - NCON)-1)
+     1          SKBLOCH(NDOF - NCOND,NDOF - NCOND),
+     2          SMBLOCH(NDOF - NCOND,NDOF - NCOND),IANODES(NCOND),
+     3          EVALS(NDOF - NCOND),
+     4          RWORK(3*(NDOF - NCOND)-2), WORK(2*(NDOF - NCOND)-1)
 
-      N = NDOF - NCON
+      N = NDOF - NCOND
 
       XJ=(0.0,1.0)
       SKBLOCH = 0.0
+      DO II=1,NCOND
+        IANODES(II) = IMNODES(II)
+      END DO
+
 
       DKX = (AKXMAX - AKXMIN)/(NKX-1)  ! X Wave Number step
       DKY = (AKYMAX - AKYMIN)/(NKY-1)  ! Y Wave Number step
@@ -51,28 +54,21 @@ C     LOCAL VARIABLES
       ICONT = 1
       DO IKX=1,NKX
 
-        AKY = AKYMIN
+       AKY = AKYMIN
         DO IKY=1,NKY
 
-
           SAUX = DCMPLX(SKG)
-          CALL BLOCH_BC(SAUX,NDOF,COORDS,IDOFCOOR,NCON,NCON_WO,  ! Bloch BC Imposition
-     1                  NCOR,AKX,AKY,IRDOF,IRDOF_WO,
-     2                  IMDOF,SKBLOCH)
+          CALL BLOCH_BC(SAUX,NDOF,COORDS,NCOND,NCOND_WO,  ! Bloch BC Imposition
+     1                  NCOR,AKX,AKY,IRNODES,IRNODES_WO,
+     2                  IMNODES,IANODES,SKBLOCH)
 
           SAUX = DCMPLX(SMG)
-          CALL BLOCH_BC(SAUX,NDOF,COORDS,IDOFCOOR,NCON,NCON_WO,  ! Bloch BC Imposition
-     1                  NCOR,AKX,AKY,IRDOF,IRDOF_WO,
-     2                  IMDOF,SMBLOCH)
+          CALL BLOCH_BC(SAUX,NDOF,COORDS,NCOND,NCOND_WO,  ! Bloch BC Imposition
+     1                  NCOR,AKX,AKY,IRNODES,IRNODES_WO,
+     2                  IMNODES,IANODES,SMBLOCH)
 
-          CALL ZHEGV(1, 'N', 'U', N, SKBLOCH, N, SMBLOCH, N, EVALS,
-     1               WORK, 2*N-1, RWORK, INFO)
-
-          IF(INFO.EQ.0)THEN
-            WRITE(*,777) ICONT, NKX*NKY
-          ELSE
-            WRITE(*,666) ICONT, INFO
-          END IF
+        CALL ZHEGV(1, 'N', 'U', N, SKBLOCH, N, SMBLOCH, N, EVALS, WORK,
+     1             2*N-1, RWORK, INFO)
 
           EIGVALS(ICONT,1) = AKX
           EIGVALS(ICONT,2) = AKY
@@ -87,9 +83,6 @@ C     LOCAL VARIABLES
       END DO
 
       RETURN
-
- 777  FORMAT(/,'WAVE NUMBER: ',I5,'/',I5)
- 666  FORMAT(/,'ERROR AT WAVE NUMBER: ',I5,'  SOLVER RETURNED: ',I5)
 
       END SUBROUTINE BLOCH
 
@@ -109,9 +102,9 @@ C     LAST MOD: 11 MARCH 2012                                          C
 C                                                                      C
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C23456789012345678901234567890123456789012345678901234567890123456789012
-      SUBROUTINE BLOCH_BC(SKAUX,NDOF,COORDS,IDOFCOOR,NCOND,NCOND_WO,
-     1                    NCOR,AKX,AKY,IRDOF,IRDOF_WO,
-     2                    IMDOF,SKBLOCH)
+      SUBROUTINE BLOCH_BC(SKAUX,NDOF,COORDS,NCOND,NCOND_WO,
+     1                    NCOR,AKX,AKY,IRNODES,IRNODES_WO,
+     2                    IMNODES,IANODES,SKBLOCH)
 
 
       IMPLICIT REAL*8(A-H,O-Z)
@@ -121,27 +114,27 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
 
       DIMENSION SKAUX(NDOF,NDOF),
      1          SKBLOCH(NDOF - NCOND,NDOF - NCOND),
-     2          COORDS(2,NCOR),
-     3          IRDOF_WO(NCOND_WO),
-     4          IMDOF(NCOND),IRDOF(NCOND),
-     5          IDOFCOOR(NDOF)
+     2          IANODES(NCOND),COORDS(2,NCOR),
+     3          IRNODES_WO(NCOND_WO),
+     4          IMNODES(NCOND),IRNODES(NCOND)
+
+      N = NDOF - NCOND
 
       XJ=(0.0,1.0)
 
-      DO II=1,NCOND_WO     ! Assigning the Phase shifts for Reference DOF
-        IR = IRDOF_WO(II)
-        IDCOR = IDOFCOOR(IR)
-        XR = COORDS(1,IDCOR); YR = COORDS(2,IDCOR)
+      DO II=1,NCOND_WO     ! Assigning the Phase shifts for Reference Nodes
+        IR = IRNODES_WO(II)
+        XR = COORDS(1,IR); YR = COORDS(2,IR)
         FR = EXP(XJ*AKX*XR)*EXP(XJ*AKY*YR)
         FCR= EXP(-XJ*AKX*XR)*EXP(-XJ*AKY*YR)
         CALL CROWMULT(SKAUX,NDOF,SKAUX,IR,FCR)
-        CALL CCOLMULT(SKAUX,NDOF,SKAUX,IR,FR)        
+        CALL CCOLMULT(SKAUX,NDOF,SKAUX,IR,FR)
+        
       END DO
 
-      DO II=1,NCOND     ! Assigning the Phase shifts for Image DOF
-        IM = IMDOF(II)
-        IDCOR = IDOFCOOR(IM)
-        XI = COORDS(1,IDCOR); YI = COORDS(2,IDCOR)
+      DO II=1,NCOND     ! Assigning the Phase shifts for Image Nodes
+        IM = IMNODES(II)
+        XI = COORDS(1,IM); YI = COORDS(2,IM)
         FI = EXP(XJ*AKX*XI)*EXP(XJ*AKY*YI)
         FCI= EXP(-XJ*AKX*XI)*EXP(-XJ*AKY*YI)
         CALL CROWMULT(SKAUX,NDOF,SKAUX,IM,FCI)
@@ -149,12 +142,12 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
       END DO
 
       DO II=1,NCOND            ! Summing rows and columns
-        IR = IRDOF(II); IM = IMDOF(II)
+        IR = IRNODES(II); IM = IMNODES(II)
         CALL CROWADD(SKAUX,NDOF,SKAUX,IM,IR)
         CALL CCOLADD(SKAUX,NDOF,SKAUX,IM,IR)
       END DO
 
-      CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IMDOF) ! Deleting redundant equations
+      CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IANODES) ! Deleting redundant equations
 
       RETURN
 
@@ -339,57 +332,4 @@ C
 
       END SUBROUTINE CCOLADD
 C
-C
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-C                                                                      C
-C     SUBROUTINE NOD2DOF                                               C
-C                                                                      C
-C                                                                      C
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-C
-      SUBROUTINE NOD2DOF(NUMN,MXDOFDIM,NEQ,ID,NCOND,NCOND_WO,NCON_DOF,
-     1                  NCON_DOF_WO,IMNODES,IRNODES,IRNODES_WO,IMDOF,
-     2                  IRDOF,IRDOF_WO,IDOFCOOR)
-C
-      IMPLICIT REAL*8 (A-H,O-Z)
-C
-      DIMENSION ID(MXDOFDIM,NUMN),IMNODES(NCOND),IRNODES(NCOND),
-     1          IRNODES_WO(NCOND_WO), IMDOF(NCON_DOF),IRDOF(NCON_DOF),
-     2          IRDOF_WO(NCON_DOF_WO), IDOFCOOR(NEQ)
-
-      ICONT = 1
-      JCONT = 1
-      DO J=1,NCOND
-        DO  I=1,MXDOFDIM
-            IF (ID(I,IMNODES(J)).NE.0)THEN
-              IMDOF(ICONT) = ID(I,IMNODES(J))
-              ICONT = ICONT + 1
-            END IF
-            IF (ID(I,IRNODES(J)).NE.0)THEN
-              IRDOF(JCONT) = ID(I,IRNODES(J))
-              JCONT = JCONT + 1
-            END IF
-        END DO
-      END DO
-
-      ICONT = 1
-      DO J=1,NCOND_WO
-        DO  I=1,MXDOFDIM
-            IF (ID(I,IRNODES_WO(J)).NE.0)THEN
-              IRDOF_WO(ICONT) = ID(I,IRNODES_WO(J))
-              ICONT = ICONT + 1
-            END IF
-        END DO
-      END DO
-
-      DO J=1,NUMN
-        DO  I=1,MXDOFDIM
-              IDOFCOOR(ID(I,J)) = J
-        END DO
-      END DO
-
-C
-      RETURN
-C
-      END SUBROUTINE NOD2DOF
 C
