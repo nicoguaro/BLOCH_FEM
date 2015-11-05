@@ -1,3 +1,10 @@
+# OS junk files
+[Tt]humbs.db
+*.DS_Store
+
+# Python
+*.pyc
+
 # Subfolders
 /Debug
 
@@ -32,7 +39,6 @@
 *.exe
 *.out
 *.app
-
 
 # Own Files
 *.dat

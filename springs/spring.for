@@ -2,10 +2,10 @@
         IMPLICIT REAL*8(A-H,O-Z)
         REAL*8 SK(16,16), SM(16,16), COORDS(2,16)
         INTEGER IRNODES_WO(6), IRNODES(10), IMNODES(10)
-        REAL*8 EIGVALS(21*21,8)
+        REAL*8 EIGVALS(41*41,8)
         PARAMETER (PI = 3.141592653589793)
 
-        OPEN(8,FILE ="spring.freq")
+        OPEN(8,FILE ="spring.fre")
 
         IRNODES_WO(1) = 1; IRNODES_WO(4) = 10
         IRNODES_WO(2) = 2; IRNODES_WO(5) = 15
@@ -57,8 +57,8 @@
 
         NEVALS = 6
 
-        NKX = 21
-        NKY = 21
+        NKX = 41
+        NKY = 41
 
 
         CALL BLOCH(NDOF,SK,SM,NCOR,COORDS,NCOND_WO,NCOND,
