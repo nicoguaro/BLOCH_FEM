@@ -1,21 +1,40 @@
-# Subfolders #
-##############
+# Subfolders
 /Debug
 
-# MS Compiling files #
-######################
-*.OPT
-*.PLG
-*.exe
-*.bsc
-
-# Visual Files #
-################
+# Visual Files
 *.DEP
 
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
-# Own Files #
-#############
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+
+# Own Files
 *.dat
 *.freq
 *.msg
