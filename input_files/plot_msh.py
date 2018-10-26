@@ -1,12 +1,12 @@
-#
 # -*- coding: utf-8 -*-
 """
 Created on Wed Mar 21 09:08:42 2012
 
-@author: Nico
+@author: Nicolas Guarin-Zapata
 """
 from numpy import array
 from matplotlib import pyplot as plt
+
 
 def plot_msh(pts, els, shw_pts, shw_els, pts_text, els_text):
     """
@@ -29,20 +29,22 @@ def plot_msh(pts, els, shw_pts, shw_els, pts_text, els_text):
             plt.plot(corx, cory, 'k')
         if els_text == True:
             centroid = [sum(corx[0:8])/8.0, sum(cory[0:8])/8.0]
-            plt.text(centroid[0]-abs(xmax-xmin)/100.0, centroid[1]-abs(ymax-ymin)/100.0, str(i+1),
-                     bbox=dict(facecolor='red', alpha=0.5))           
+            plt.text(centroid[0]-abs(xmax-xmin)/100.0,
+                     centroid[1]-abs(ymax-ymin)/100.0, str(i+1),
+                     bbox=dict(facecolor='red', alpha=0.5))
 
-    if shw_pts == True: 
+    if shw_pts == True:
         plt.plot(pts[:, 0], pts[:, 1], 'o')
 
     plt.axis('equal')
     plt.axis([xmin, xmax, ymin, ymax])
     plt.axis('off')
-    
+
     npts = pts.shape[0]
     if pts_text == True:
         for i in range(0, npts):
-            plt.text(pts[i, 0] + abs(xmax-xmin)/100.0, pts[i, 1] + abs(xmax-xmin)/100.0, str(i+1))
+            plt.text(pts[i, 0] + abs(xmax-xmin)/100.0,
+                     pts[i, 1] + abs(xmax-xmin)/100.0, str(i+1))
     plt.show()
 
 
@@ -50,7 +52,7 @@ def ex_msh():
     """
         Return an example mesh for the function plt_msh.
     """
-    pts=array([
+    pts = array([
            [ 1.     ,  0.     ],
            [ 1.     ,  1.     ],
            [ 0.     ,  1.     ],
@@ -214,3 +216,8 @@ def ex_msh():
        [ 24,  75,  57,   7,  76, 128,  58,  29],
        [ 75,  16,  12,  57,  77,  93,  59, 128]])
     return pts, els
+
+
+if __name__ == "__main__":
+    pts, els = ex_msh()
+    plot_msh(pts, els, True, True, False, False)

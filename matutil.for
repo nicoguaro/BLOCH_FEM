@@ -97,15 +97,15 @@ C**********************************************************************
 C
 C     Real elastic properties
 C
-      EG2=TWO*PROPS(1)*PROPS(1)*PROPS(3)
-      EG=EG2/TWO
-      ENU=PROPS(2)
-      EMOD=EG2*(ONE+ENU)
-      ELAM=(ENU*EMOD)/((ONE+ENU)*(ONE-TWO*ENU))
-      ELPNU=ELAM+EG2
-      XI=PROPS(5)
-      GAMMA=PROPS(6)
-      EGC=PROPS(7)
+      EG2 = TWO*PROPS(1)*PROPS(1)*PROPS(3)
+      EG = EG2/TWO
+      ENU = PROPS(2)
+      EMOD = EG2*(ONE+ENU)
+      ELAM = (ENU*EMOD)/((ONE+ENU)*(ONE-TWO*ENU))
+      ELPNU = ELAM+EG2
+      XI = PROPS(5)
+      GAMMA = PROPS(6)
+      EGC = PROPS(7)
 C
 C     Elastic complex stiffness
 C
@@ -115,12 +115,12 @@ C
         END DO
         DDSDDE(K1, K1)=ELPNU
       END DO
-      DDSDDE(4, 4)=EG+EGC
-      DDSDDE(4, 5)=EG-EGC
-      DDSDDE(5, 4)=DDSDDE(4, 5)
-      DDSDDE(5, 5)=EG+EGC
-      DDSDDE(6, 6)=GAMMA
-      DDSDDE(7, 7)=GAMMA
+      DDSDDE(4, 4) = EG+EGC
+      DDSDDE(4, 5) = EG-EGC
+      DDSDDE(5, 4) = DDSDDE(4, 5)
+      DDSDDE(5, 5) = EG+EGC
+      DDSDDE(6, 6) = GAMMA
+      DDSDDE(7, 7) = GAMMA
 C
       RETURN
 C

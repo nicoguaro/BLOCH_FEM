@@ -37,7 +37,7 @@ Output:
 Pseudocode:
 -----------
 
-Start        
+Start
     Associate node numbering with DOF numbering
     
     For i=1 to nkx

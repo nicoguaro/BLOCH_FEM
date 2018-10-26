@@ -1,87 +1,87 @@
-HEADING BLOCK(1 LINE)
-(1)TITLE LINE UP TO 80 CHARACTERS
------------------------------------------------------------------------------------------------
-CONTROLBLOCK (1 LINE) WITH THE FOLLOWING PARAMETERS:
+# Heading block (1 line)
+
+(1)Title line, upt to 80 characters
+
+# Control block (1 line) with the following parameters:
 
 NUMNP NUMEL NUMAT MXDOFDIM MXNE MXDOFEL NMPR MCRD
 
-(1)NUMNP   : NUMBER OF NODAL POINTS(I5)
-(2)NUMEL   : NUMBER OF ELEMENTS(I5)
-(3)NUMAT   : NUMBER OF MATERIAL PROPERTIES(I5)
-(4)MXDOFDIM: MAXIMUM DEGREE OF FREEDOM DIMENSION(I5)
-             MXDOFDIM=2 FOR 2D ELASTICITY
-             MXDOFDIM=3 FOR 2D COSSERAT ELASTICITY
-(5)MXNE    : MAXIMUM NUMBER OF NODES IN ANY ELEMENT(I2)
-(6)MXDOFEL : MAXIMUM NUMBER OF DEGREES OF FREEDOM PER ELEMENT(I2)
-(7)NMPR    : MAXIMUM NUMBER OF MATERIAL PROPERTIES IN THE MODEL(I4)  
-(8)MCRD    : MAXIMUM NUMBER OF COORDINATES(I5) 
------------------------------------------------------------------------------------------------
-NODAL INFORMATION BLOCK(NUMNP LINES) WITH THE FOLLOWING PARAMETERS
+(1)NUMNP   : Number of nodal points (I5)
+(2)NUMEL   : Number of elemenets (I5)
+(3)NUMAT   : Number of material properties (I5)
+(4)MXDOFDIM: Maximum degree of freedom dimension (I5)
+             MXDOFDIM=2 for 2D elasticity
+             MXDOFDIM=3 for 2D Cosserat elasticity
+(5)MXNE    : Maximum number of nodes in any element (I2)
+(6)MXDOFEL : Maximum number of degrees of freedom per element (I2)
+(7)NMPR    : Maximum number of material properties in the model (I4)
+(8)MCRD    : Maximum number of coordinates (I5)
+
+# Nodal information Block (NUMNP lines) with the following parameters
 
 ID NDOF BC1 BC2....BCNDOF COORD1 COORD2
 
-(1)ID                 : NODAL ID (I5)
-(2)NDOF               : NUMBER OF DEGREES OF FREEEDOM AT THIS NODE(I5)
-(3..NDOF) BC1..BCNDOF : BOUNDARY CONDITION CODE AT EVERY DEGREE OF FREEDOM (NDOF VALUES-I2)
+(1)ID                 : Nodal ID (I5)
+(2)NDOF               : Number of degrees of freedom at this node(I5)
+(3..NDOF) BC1..BCNDOF : Boundary condition code at every degree of freedom (NDOF VALUES-I2)
                         BCI=0,1,-1
-                        0 FREE
-                        1 RESTRAINED
-                       -1 IMPOSED DIFFERENT FROM ZERO
-(NDOF+1)COORD1        : X-COORDINATE (F10.5)
-(NDOF+2)COORD2        : Y-COORDINATE (F10.5)
------------------------------------------------------------------------------------------------
-MATERIAL INFORMATION BLOCK(NUMAT LINES) WITH THE FOLLOWING PARAMETERS
+                        0 Free
+                        1 Restrained
+                       -1 Imposed different from zero
+(NDOF+1)COORD1        : X-coordinate (F10.5)
+(NDOF+2)COORD2        : Y-coordinate (F10.5)
+
+# Material information block (NUMAT lines) with the following parameters
 
 ID NUMMATP PROP(1) PROP(2).....PROP(NUMATP)
 
-(1)ID          : MATERIAL PROPERTY ID (I5)
-(2)NUMATP      : NUMBER OF PROPERTIES FOR THIS MATERIAL (I5)
-(3)PROP(I)     : MATERIAL PROPERTY I(F12.5)
+(1)ID          : Material property ID (I5)
+(2)NUMATP      : Number of properties for this material (I5)
+(3)PROP(I)     : Material property I (F12.5)
 
+For the Cosserat model the input is
 
-FOR THE COSSERAT MODEL THE INPUT IS
+ID  7   BETA    CPOIS   RHO    J   XI  GAMMA   MU_C
 
-ID  7   BETA    CPOIS   RHO J   XI  GAMMA   MU_C
+BETA:   Classical shear wave speed  (>0)
+CPOIS:  Poisson coefficient  (-1, 0.5)
+RHO:    Mass density  (>0)
+J:      Inertia moment density (rotational inertia)  (>0)
+XI:     Damping factor  (>0)
+GAMMA:  Micropolar distorsion modulus (>0)
+MU_C:   Relative shear modulus
 
-BETA:   CLASSICAL SHEAR WAVE SPEED  (>0)
-CPOIS:  POISSON COEFFICIENT  (-1,0.5)
-RHO:    MASS DENSITY  (>0)
-J:      INERTIA MOMENT DENSITY (ROTATIONAL INERTIA)  (>0)
-XI:     DAMPING FACTOR  (>0)
-GAMMA:  MICROPOLAR DISTORSION MODULI  (>0)
-MU_C:   RELATIVE SHEAR MODULI
------------------------------------------------------------------------------------------------
-ELEMENTS INFORMATION BLOCK(NUMEL LINES) WITH THE FOLLOWING PARAMETERS
+# Elements information block (NUMEL lines) with the following parameters
 
 ID EL_TYPE NDOFEL MAT_TYPE NNE NODE1 NODE2......NODE_NNE
 
-(1)ID          : ELEMENT ID (I5)
-(2)EL_TYPE     : ELEMENT TYPE(I1)
-                (1) 8-NODED QUAD. DISPLACEMENT BASED-ELASTIC MATERIAL-PLANE STRAIN
-                (2) 9-NODED QUAD. DISPLACEMENT BASED-ELASTIC MATERIAL-PLANE STRAIN
-                (3) 8-NODED QUAD. DISPLACEMENT BASED ELASTIC FULL COSSERAT IN PLANE STRAIN
-(3)NDOFEL      : NUMBER OF DEGREES OF FREEDOM FOR THIS ELEMENT(I5)
-(4)MAT_TYPE    : MATERIAL ID CORRESPONDING TO THIS ELEMENT AS DEFINED IN THE MATERIAL DATA BLOCK(I5)
-(5)NNE         : NUMBER OF NODES FOR THIS ELEMENT(I5)
-(6)NODE(I)     : NODAL CONNECTIVITY LIST(I5)-NNE VALUES
------------------------------------------------------------------------------------------------
-EIGENANALYSIS INFORMATION BLOCK(3 LINES) WITH THE FOLLOWING PARAMETERS
+(1)ID          : Element ID (I5)
+(2)EL_TYPE     : Element type (I1)
+                (1) 8-nodes quad. Displacement-based elastic material (plane strain)
+                (2) 9-nodes quad. Displacement-based elastic material (plane strain)
+                (3) 8-nodes quad. Displacement based elastic full-Cosserat in plane strain
+(3)NDOFEL      : Number of degrees of freedom for this element (I5)
+(4)MAT_TYPE    : Material ID corresponding to this element as defined in the material data block (I5)
+(5)NNE         : Number of nodes for this element (I5)
+(6)NODE(I)     : Nodal connectivity list (I5) - NNE values
+
+# Eigenanalysis information block (3 lines) with the following parameters
 
 KXMIN KYMIN KXMAX KYMAX NKX NKY NCOND_WO NCOND NEVALS
 IMNODE1 IMNODE2 IMNODE3....IMNODE_NCOND
 IRNODE1 IRNODE2 IRNODE3....IRNODE_NCOND
 IRNODE_W1  IRNODE_W2-----IRNODE_WO1_NCOND
 
-(1)KXMAX		: MINIMUM WAVE NUMBER IN X DIRECTION
-(2)KYMAX		: MINIMUM WAVE NUMBER IN Y DIRECTION
-(3)KXMAX		: MAXIMUM WAVE NUMBER IN X DIRECTION
-(4)KYMAX		: MAXIMUM WAVE NUMBER IN Y DIRECTION
-(5)NKX			: NUMBER OF VALUES FOR WAVE NUMBER IN X DIRECTION
-(6)NKX			: NUMBER OF VALUES FOR WAVE NUMBER IN Y DIRECTION
-(7)NCOND_WO		: NUMBER OF BLOCH CONDITIONS WITHOUT REPEAT INDEXE
-(8)NCOND		: NUMBER OF BLOCH CONDITIONS
-(8)NEVALS		: NUMBER OF EIGENVALUES TO EXTRACT
-(9)IMNODE_I_a	: IMAGE NODE I WITHOUT REPEATED INDEXES
-(10)IRNODE_I_b	: REFERENCE NODE I, WITHOUT REPEATED INDEXES, FOR EACH IMAGE NODE THERE EXISTS A REFERENCE NODE
-(11)IMNODE_I	: IMAGE NODE I
-(12)IRNODE_I	: REFERENCE NODE I, FOR EACH IMAGE NODE THERE EXISTS A REFERENCE NODE
+(1)KXMAX		: Minimum wave number in x direction
+(2)KYMAX		: Minimum wave number in y direction
+(3)KXMAX		: Maximum wave number in x direction
+(4)KYMAX		: Maximum wave number in y direction
+(5)NKX			: Numbte of values for wave number in x direction
+(6)NKX			: Number of values for wave number in y direction
+(7)NCOND_WO		: Number of Bloch condition without repeated indexes
+(8)NCOND		: Number of Bloch conditions
+(8)NEVALS		: Number of eigenvalues to extract
+(9)IMNODE_I_a	: Image node I without repreated indexes
+(10)IRNODE_I_b	: Rererence node I, without repeated indexes, for each image node there exists a reference node
+(11)IMNODE_I	: Image node I
+(12)IRNODE_I	: Rerefence node I, for each image node there exists a reference node

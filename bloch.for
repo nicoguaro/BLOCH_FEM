@@ -65,7 +65,7 @@ C     LOCAL VARIABLES
      1                  NCOR,AKX,AKY,IRDOF,IRDOF_WO,
      2                  IMDOF,SMBLOCH)
 
-          CALL ZHEGV(1, 'N', 'U', N, SKBLOCH, N, SMBLOCH, N, EVALS,
+          CALL ZHEGV(1, 'N', 'L', N, SKBLOCH, N, SMBLOCH, N, EVALS,
      1               WORK, 2*N-1, RWORK, INFO)
 
           IF(INFO.EQ.0)THEN
@@ -128,17 +128,17 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
 
       XJ=(0.0,1.0)
 
-      DO II=1,NCOND_WO     ! Assigning the Phase shifts for Reference DOF
+      DO II=1,NCOND_WO    ! Assigning the Phase shifts for Reference DOF
         IR = IRDOF_WO(II)
         IDCOR = IDOFCOOR(IR)
         XR = COORDS(1,IDCOR); YR = COORDS(2,IDCOR)
         FR = EXP(XJ*AKX*XR)*EXP(XJ*AKY*YR)
         FCR= EXP(-XJ*AKX*XR)*EXP(-XJ*AKY*YR)
         CALL CROWMULT(SKAUX,NDOF,SKAUX,IR,FCR)
-        CALL CCOLMULT(SKAUX,NDOF,SKAUX,IR,FR)        
+        CALL CCOLMULT(SKAUX,NDOF,SKAUX,IR,FR)
       END DO
 
-      DO II=1,NCOND     ! Assigning the Phase shifts for Image DOF
+      DO II=1,NCOND    ! Assigning the Phase shifts for Image DOF
         IM = IMDOF(II)
         IDCOR = IDOFCOOR(IM)
         XI = COORDS(1,IDCOR); YI = COORDS(2,IDCOR)
@@ -148,13 +148,13 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
         CALL CCOLMULT(SKAUX,NDOF,SKAUX,IM,FI)
       END DO
 
-      DO II=1,NCOND            ! Summing rows and columns
+      DO II=1,NCOND    ! Summing rows and columns
         IR = IRDOF(II); IM = IMDOF(II)
         CALL CROWADD(SKAUX,NDOF,SKAUX,IM,IR)
         CALL CCOLADD(SKAUX,NDOF,SKAUX,IM,IR)
       END DO
 
-      CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IMDOF) ! Deleting redundant equations
+      CALL COLROWDEL(SKAUX,NDOF,NCOND,SKBLOCH,IMDOF)    ! Deleting redundant equations
 
       RETURN
 
@@ -291,7 +291,7 @@ C
       COMPLEX*16 A, B
       INTEGER ROW1, ROW2
       DIMENSION A(N,N),B(N,N)
- 
+
       DO II=1,N
           DO JJ=1,N
             IF (II.EQ.ROW2) THEN
@@ -323,7 +323,7 @@ C
       COMPLEX*16 A, B
       INTEGER COL1, COL2
       DIMENSION A(N,N),B(N,N)
- 
+
       DO II=1,N
           DO JJ=1,N
             IF (JJ.EQ.COL2) THEN

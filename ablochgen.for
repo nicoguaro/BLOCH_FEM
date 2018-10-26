@@ -51,10 +51,10 @@ C
       IOUT=8
       IMSG=9
       IFRQ =10
-      WRITE(*,*) 'INPUT THE JOB NAME(max 10 characters):'
+      WRITE(*,*) 'INPUT THE JOB NAME(max 10 characters): '
       READ(*,*) FILENAME
       LST=LEN_TRIM(FILENAME)
-      OPEN(UNIT=IIN,FILE =FILENAME(1:LST)//".inp",FORM='FORMATTED')
+      OPEN(UNIT=IIN,FILE=FILENAME(1:LST)//".inp",FORM='FORMATTED')
       OPEN(UNIT=IOUT,FILE=FILENAME(1:LST)//".dat",FORM='FORMATTED')
       OPEN(UNIT=IMSG,FILE=FILENAME(1:LST)//".msg",FORM='FORMATTED')
       OPEN(UNIT=IFRQ,FILE=FILENAME(1:LST)//".fre",FORM='FORMATTED')
@@ -142,7 +142,10 @@ C
       CALL GSTFASEM(NUMNP,NUMEL,NUMAT,NNE,NMNE,NMDOFEL,IELT,IELCON,
      1              NDOFN,NDOFEL,MATP,NMATP,NMPR,MCRD,AMATE,
      2              COORD,LM,NEQ,SKG,SMG,IATYPE,IOUT)
-      
+
+      WRITE(IMSG, *) SKG
+
+
       IACU = 0
       DO I=1,MXDOFDIM
         DO  J=1,NCOND
@@ -186,7 +189,7 @@ C     *****************************************************************C
       END DO
 
 C
-      WRITE(IMSG,3050)
+C      WRITE(IMSG,3050)
       STOP
 
  1900 FORMAT(//,10X,'P R O B L E M   N A M E',10X,A80,//)

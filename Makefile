@@ -1,8 +1,8 @@
 # ============================================================================
 # Name        : Makefile
-# Author      : 
+# Author      :
 # Version     :
-# Copyright   : 
+# Copyright   :
 # Description : Makefile for Damian Bloch
 # ============================================================================
 
